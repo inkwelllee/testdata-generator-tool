@@ -1,0 +1,10 @@
+.DS_Store
+__pycache__/
+build/
+dist/
+asserts/lotto.json
+*.spec
+node_modules/
+pnpm-lock.yaml
+yarn.lock
+.idea
