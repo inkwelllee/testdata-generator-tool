@@ -32,7 +32,7 @@ testdata-generator-tool/
 ```
 
 ## 效果图展示
-### vue版(pywebview分支)
+### vue版(pywebview)
 ![浅色](./images/example.jpg)
 ---
 ![深色](./images/example-dark.jpg)
