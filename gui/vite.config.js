@@ -1,12 +1,16 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import path from 'path';
+import copyToUiPlugin from './vite-plugin-copy-to-ui.js';
 
 // https://vite.dev/config/
 export default defineConfig({
 	publicPath: './',
 	base: './',
-	plugins: [vue()],
+	plugins: [
+		vue(),
+		copyToUiPlugin() // 自动复制到ui目录
+	],
 	resolve: {
 		alias: {
 			'~': path.resolve(__dirname, './'),

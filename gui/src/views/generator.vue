@@ -182,7 +182,7 @@
 
 			<!-- 节日信息 -->
 			<el-dialog v-model="windowConfig.festivalInfo" title="节日快乐" :align-center="true" :width="1150" :height="550" draggable>
-				<iframe v-if="windowConfig.festivalInfo" src="../../public/festival/newYear.html" :width="1100" :height="550" style="overflow: hidden" frameborder="0"></iframe>
+				<FestivalAnimation v-if="windowConfig.festivalInfo" />
 			</el-dialog>
 			<!-- 设置按钮 -->
 			<el-drawer v-model="windowConfig.winSetUp" :before-close="winSetUpBeforeClose" direction="ltr" size="400px">
@@ -230,7 +230,7 @@
 				</template>
 				<template #footer>
 					<div style="flex: auto">
-						<h6>版本：5.2.24</h6>
+						<h6>版本：0.5.11.5</h6>
 					</div>
 				</template>
 			</el-drawer>
@@ -239,8 +239,8 @@
 </template>
 
 <script setup>
-	import { ref, onMounted, watch } from 'vue';
-	import { ElMessage, ElMessageBox } from 'element-plus';
+	import { ref, onMounted } from 'vue';
+	import { ElMessage } from 'element-plus';
 	import { CopyDocument, User, Pointer, Postcard, Refresh, Close, Minus, Select, RefreshRight, FullScreen, Menu } from '@element-plus/icons-vue';
 	import { copyToClipboard } from '@/utils';
 	import moment from 'moment';
@@ -248,6 +248,7 @@
 	import { useDark, useToggle } from '@vueuse/core';
 	import Sun from '@/assets/icons/sun.vue';
 	import Moon from '@/assets/icons/moon.vue';
+	import FestivalAnimation from '@/components/FestivalAnimation.vue';
 
 	// 深色模式
 	const isDark = useDark();
@@ -317,13 +318,6 @@
 		PSBC: '邮储银行账号',
 	};
 
-	const buttonPositions = ref({
-		button1: { left: 0, top: 0 },
-		button2: { left: 50, top: 0 },
-		button3: { left: 100, top: 0 },
-		button4: { left: 150, top: 0 },
-	});
-
 	const customColors = ref([
 		{ color: '#f56c6c', percentage: 20 },
 		{ color: '#e6a23c', percentage: 40 },
@@ -336,7 +330,6 @@
 		'暂别勿思念，转瞬与亲见',
 		'暂别莫惆怅，不久再相逢',
 		'离别有时，重逢有期',
-		'暂别无需伤，归期定不远',
 		'暂别且安心，相逢终有时',
 		'暂时的离别，是为了更好的相遇',
 		'离别只是短暂，期待再次相遇',
@@ -350,7 +343,7 @@
 	onMounted(() => {
 		formData.value.gender = Math.random() > 0.5 ? 1 : 0;
 		//getTangDaren();
-		windowConfig.value.exitTipText = ref(exitTip[Math.floor(Math.random() * exitTip.length)]);
+		windowConfig.value.exitTipText = exitTip[Math.floor(Math.random() * exitTip.length)];
 		residuePercent.value = (localStorage.getItem('nbBalance') || 100) * 1;
 		setTimeout(() => {
 			resizeApp();
@@ -363,13 +356,17 @@
 	});
 
 	function showFestivalInfo() {
-		let today = new Date();
-		let month = today.getMonth() + 1; // 注意月份是从 0 开始的，要加 1
-		let day = today.getDate();
-		if (month === 1 && (day === 1 || day === 2)) {
-			console.log('显示节日信息');
+		const today = new Date();
+		const month = today.getMonth() + 1; // 注意月份是从 0 开始的，要加 1
+		const day = today.getDate();
+		console.log('加载节日', today, month, day);
+
+		// 检查是否为特定节日日期
+		if (month === 1 && day >= 1 && day <= 7) {
+			console.log('######## 欢度元旦 ########');
 			windowConfig.value.festivalInfo = true;
 
+			// 91.5秒后自动关闭
 			setTimeout(() => {
 				windowConfig.value.festivalInfo = false;
 			}, 91500);
@@ -623,8 +620,11 @@
 					img.src = imageUrl;
 					img.height = 260;
 					img.width = 260;
-					// 将img标签添加到文档中（例如，添加到body）
-					document.getElementById('imgid').appendChild(img);
+
+					// 清空容器后再添加新图片，避免重复
+					const container = document.getElementById('imgid');
+					container.innerHTML = '';
+					container.appendChild(img);
 					windowConfig.value.getQRStatus = true;
 				})
 				.catch(error => {
@@ -637,18 +637,9 @@
 		}
 	}
 
-	function test() {
-		try {
-			window.pywebview.api.test();
-		} catch (error) {
-			console.error('test');
-		}
-	}
-
 	// 切换目录
 	function changeDirectory(data, isInit = false) {
 		try {
-			console.log();
 			localStorage.setItem('directoryType', data);
 			if ('diy' === data) {
 				windowConfig.value.directoryPath = localStorage.getItem('directoryPath') || '';

@@ -7,6 +7,13 @@
 		"format": "prettier --write \"**/*.{js,ts,vue,scss,html,md,json}\" --ignore-path .gitignore",
 		"dev": "vite",
 		"build": "vite build",
+		"build:copy": "vite build && npm run copy:ui",
+		"copy:ui": "node scripts/copy-to-ui.js",
+		"copy:ui:win": "scripts\\copy-to-ui.bat",
+		"copy:ui:unix": "bash scripts/copy-to-ui.sh",
+		"build:prod": "vite build && npm run copy:ui",
+		"build:win": "vite build && npm run copy:ui:win",
+		"build:unix": "vite build && npm run copy:ui:unix",
 		"preview": "vite preview"
 	},
 	"dependencies": {

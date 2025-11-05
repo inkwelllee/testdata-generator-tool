@@ -4,6 +4,7 @@ build/
 dist/
 asserts/lotto.json
 asserts/ui/
+logs/
 *.spec
 node_modules/
 pnpm-lock.yaml
