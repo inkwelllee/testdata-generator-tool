@@ -3,8 +3,10 @@ __pycache__/
 build/
 dist/
 asserts/lotto.json
+asserts/ui/
 *.spec
 node_modules/
 pnpm-lock.yaml
 yarn.lock
 .idea
+output.log
