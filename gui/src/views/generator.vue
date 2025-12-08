@@ -33,118 +33,23 @@
 			</el-row>
 		</el-header>
 		<el-form class="app-from" ref="formRef" v-loading="formLoading" :model="formData" label-width="120px" label-position="top">
-			<el-row :gutter="15">
-				<el-col :span="8">
-					<el-card style="height: 500px">
-						<template #header>
-							<div class="card-header">
-								<span>身份信息</span>
-							</div>
-						</template>
-						<el-row :gutter="10">
-							<el-col :span="12">
-								<el-form-item label="性别">
-									<el-radio-group v-model="formData.gender">
-										<el-radio :value="1">男</el-radio>
-										<el-radio :value="0">女</el-radio>
-									</el-radio-group>
-								</el-form-item>
-							</el-col>
-							<el-col :span="12">
-								<el-form-item label="出生日期">
-									<el-date-picker v-model="formData.birthday" type="date" format="YYYY-MM-DD" value-format="YYYY-MM-DD"></el-date-picker>
-								</el-form-item>
-							</el-col>
-						</el-row>
-						<el-row :gutter="10" v-for="(label, field) in personalInfoFields" :key="field">
-							<el-col :span="24">
-								<el-form-item :label="label">
-									<el-col :span="20">
-										<el-input v-model="formData[field]" disabled>
-											<template #append>
-												<el-button :icon="CopyDocument" @click="copy(field)"></el-button>
-											</template>
-										</el-input>
-									</el-col>
-									<el-col :span="4">
-										<el-button :icon="Pointer" @click="generator(field)"></el-button>
-									</el-col>
-								</el-form-item>
-							</el-col>
-						</el-row>
-					</el-card>
-				</el-col>
-				<el-col :span="8">
-					<el-card style="height: 500px">
-						<template #header>
-							<div class="card-header">
-								<span>企业信息</span>
-							</div>
-						</template>
-						<el-row :gutter="10" v-for="(label, field) in companyInfoFields" :key="field">
-							<el-col :span="24">
-								<el-form-item :label="label">
-									<el-col :span="20">
-										<el-input v-model="formData[field]" disabled>
-											<template #append>
-												<el-button :icon="CopyDocument" @click="copy(field)"></el-button>
-											</template>
-										</el-input>
-									</el-col>
-									<el-col :span="4">
-										<el-button :icon="Pointer" @click="generator(field)"></el-button>
-									</el-col>
-								</el-form-item>
-							</el-col>
-						</el-row>
-					</el-card>
-				</el-col>
-				<el-col :span="8">
-					<el-card style="height: 500px">
-						<template #header>
-							<div class="card-header">
-								<span>账号信息</span>
-							</div>
-						</template>
-						<el-row :gutter="10" v-for="(label, field) in accountInfoFields" :key="field">
-							<el-col :span="24">
-								<el-form-item :label="label">
-									<el-col :span="20">
-										<el-input v-model="formData[field]" disabled>
-											<template #append>
-												<el-button :icon="CopyDocument" @click="copy(field)"></el-button>
-											</template>
-										</el-input>
-									</el-col>
-									<el-col :span="4">
-										<el-button :icon="Pointer" @click="generator(field)"></el-button>
-									</el-col>
-								</el-form-item>
-							</el-col>
-						</el-row>
-					</el-card>
-				</el-col>
-			</el-row>
-			<!-- 鸡汤 -->
-			<!-- <el-row :gutter="15" style="padding-top: 10px">
-				<el-col>
-					<el-button plain type="primary" size="small" @click="getTangDaren">汤达人：{{ windowConfig.tangDaren }}</el-button>
-				</el-col>
-			</el-row> -->
-			<!-- 按钮 -->
-			<el-row :gutter="15" style="padding-top: 10px">
-				<el-col :span="24">
-					<el-form-item>
-						<div class="mb-4">
-							<el-button type="primary" :icon="Pointer" @click="generator('all')"> 生成 </el-button>
-							<el-button type="info" :icon="Refresh" @click="resetForm">重置</el-button>
-							<el-button plain type="primary" :icon="User" @click="generateIdCardImage">身份证</el-button>
-							<el-button plain type="primary" :icon="Postcard" @click="generateBusinessImage">营业执照</el-button>
-							<!-- <el-button plain type="primary" :icon="Postcard" @click="test">test</el-button> -->
-						</div>
-					</el-form-item>
-				</el-col>
-			</el-row>
+			<el-tabs type="border-card">
+				<el-tab-pane label="基础信息">
+					<BasicInfoGenerator
+						:checkNbBalance="checkNbBalance"
+						:windowConfig="windowConfig"
+						:setFormLoading="setFormLoading"
+						:consumeNb="consumeNb"
+					/>
+				</el-tab-pane>
+				<el-tab-pane label="车辆信息">
+					<VehicleInfoGenerator
+						:checkNbBalance="checkNbBalance"
+						:setFormLoading="setFormLoading"
+						:consumeNb="consumeNb"
+					/>
+				</el-tab-pane>
+			</el-tabs>
 			<!-- 投币 -->
 			<el-dialog v-model="dialogVisible" title="这是另外的价钱" width="500" :close-on-click-modal="false" :show-close="false">
 				<div class="block text-center" style="height: 280px">
@@ -185,55 +90,16 @@
 				<FestivalAnimation v-if="windowConfig.festivalInfo" />
 			</el-dialog>
 			<!-- 设置按钮 -->
-			<el-drawer v-model="windowConfig.winSetUp" :before-close="winSetUpBeforeClose" direction="ltr" size="400px">
-				<template #header>
-					<h4>设置</h4>
-				</template>
-				<template #default>
-					<div>
-						<h5>窗口设置</h5>
-						<el-button plain type="primary" :icon="Menu" size="small" @click="resizeApp('resize')">还原默认大小</el-button>
-					</div>
-					<div class="slider-demo-block">
-						<span class="demonstration">窗口宽度</span>
-						<el-slider v-model="windowConfig.screenWidth" @input="resizeApp" @change="saveWinSizeItem" :min="700" :max="windowConfig.maxScreenWidth" :step="1" show-input size="small" />
-					</div>
-					<div class="slider-demo-block">
-						<span class="demonstration">窗口高度</span>
-						<el-slider v-model="windowConfig.screenHeight" @input="resizeApp" @change="saveWinSizeItem" :min="300" :max="windowConfig.maxscreenHeight" :step="1" show-input size="small" />
-					</div>
-					<div>
-						<h5>生成目录</h5>
-						<el-radio-group v-model="windowConfig.directoryType" @change="changeDirectory" size="small">
-							<el-radio-button label="桌面" value="desktop" />
-							<el-radio-button label="跟随应用" value="follow" />
-							<el-radio-button label="自定义" value="diy" />
-						</el-radio-group>
-						<div>
-							<el-input
-								v-model="windowConfig.directoryPath"
-								placeholder="例：D:\下载 ，输入完请点击后方按钮检测是否可用"
-								:disabled="windowConfig.directoryType !== 'diy'"
-								@change="changePath"
-								size="small"
-							>
-								<!-- <template #prepend>目录</template> -->
-								<template #append>
-									<el-button :disabled="windowConfig.directoryType !== 'diy'" @click="checkPath()">
-										<el-icon v-if="windowConfig.enablePath || windowConfig.directoryType !== 'diy'" color="#69ffb4"><Select /></el-icon>
-										<el-icon v-else color="#d8e510"><RefreshRight /></el-icon>
-									</el-button>
-								</template>
-							</el-input>
-						</div>
-					</div>
-				</template>
-				<template #footer>
-					<div style="flex: auto">
-						<h6>版本：0.5.11.5</h6>
-					</div>
-				</template>
-			</el-drawer>
+			<SettingsDrawer
+				v-model:visible="windowConfig.winSetUp"
+				:config="windowConfig"
+				:resizeApp="resizeApp"
+				:saveWinSizeItem="saveWinSizeItem"
+				:changeDirectory="changeDirectory"
+				:changePath="changePath"
+				:checkPath="checkPath"
+				:beforeClose="winSetUpBeforeClose"
+			/>
 		</el-form>
 	</el-scrollbar>
 </template>
@@ -241,7 +107,7 @@
 <script setup>
 	import { ref, onMounted } from 'vue';
 	import { ElMessage } from 'element-plus';
-	import { CopyDocument, User, Pointer, Postcard, Refresh, Close, Minus, Select, RefreshRight, FullScreen, Menu } from '@element-plus/icons-vue';
+	import { CopyDocument, User, Pointer, Postcard, Refresh, Close, Minus, FullScreen } from '@element-plus/icons-vue';
 	import { copyToClipboard } from '@/utils';
 	import moment from 'moment';
 	import axios from 'axios';
@@ -249,6 +115,9 @@
 	import Sun from '@/assets/icons/sun.vue';
 	import Moon from '@/assets/icons/moon.vue';
 	import FestivalAnimation from '@/components/FestivalAnimation.vue';
+	import SettingsDrawer from '@/components/SettingsDrawer.vue';
+	import BasicInfoGenerator from '@/components/BasicInfoGenerator.vue';
+	import VehicleInfoGenerator from '@/components/VehicleInfoGenerator.vue';
 
 	// 深色模式
 	const isDark = useDark();
@@ -264,7 +133,7 @@
 		winSetUp: false, //窗口设置是否展示
 		restoreWindow: false, //窗口放大或恢复
 		screenWidth: (localStorage.getItem('screenWidth') || 1200) * 1, //窗口宽度
-		screenHeight: (localStorage.getItem('screenHeight') || 660) * 1, //窗口高度
+		screenHeight: (localStorage.getItem('screenHeight') || 700) * 1, //窗口高度
 		maxScreenWidth: window.screen.width * window.devicePixelRatio || 1920, //最大窗口宽度(屏幕宽度 * 缩放比例)
 		maxscreenHeight: window.screen.height * window.devicePixelRatio || 1080, //最大窗口高度
 		exitTipText: '暂别勿思念，转瞬与亲见', //退出提示语
@@ -277,46 +146,7 @@
 		directoryPath: localStorage.getItem('directoryPath') || '', //生成目录路径
 	});
 
-	const formData = ref({
-		gender: 0,
-		birthday: '1992-07-25',
-		name: '',
-		phone: '',
-		email: '',
-		idCard: '',
-		company: '',
-		socialCreditCode: '',
-		organizationCode: '',
-		zhongzhengCode: '',
-		BOC: '',
-		CCB: '',
-		ABC: '',
-		ICBC: '',
-		PSBC: '',
-	});
 
-	const personalInfoFields = {
-		name: '姓名',
-		idCard: '身份证号',
-		phone: '手机号',
-		email: '邮箱',
-	};
-
-	const companyInfoFields = {
-		company: '公司名称',
-		name: '法定代表人',
-		socialCreditCode: '统一社会信用代码',
-		organizationCode: '组织机构代码',
-		zhongzhengCode: '中征码',
-	};
-
-	const accountInfoFields = {
-		BOC: '中国银行账号',
-		CCB: '建设银行账号',
-		ABC: '农业银行账号',
-		ICBC: '工商银行账号',
-		PSBC: '邮储银行账号',
-	};
 
 	const customColors = ref([
 		{ color: '#f56c6c', percentage: 20 },
@@ -341,7 +171,7 @@
 	];
 
 	onMounted(() => {
-		formData.value.gender = Math.random() > 0.5 ? 1 : 0;
+		//formData.value.gender = Math.random() > 0.5 ? 1 : 0;
 		//getTangDaren();
 		windowConfig.value.exitTipText = exitTip[Math.floor(Math.random() * exitTip.length)];
 		residuePercent.value = (localStorage.getItem('nbBalance') || 100) * 1;
@@ -349,7 +179,7 @@
 			resizeApp();
 			saveWinSizeItem(); // 初始化窗口大小
 			changeDirectory(windowConfig.value.directoryType, true); //初始化生成路径
-			generator('all', true);
+			//generator('all', true);
 		}, 100);
 
 		showFestivalInfo();
@@ -373,102 +203,13 @@
 		}
 	}
 
-	function generator(type, isInit = false) {
-		if (checkNbBalance(isInit)) {
-			return;
-		}
-
-		formLoading.value = true;
-
-		try {
-			if (type === 'name') {
-				window.pywebview.api.randomName(formData.value.gender).then(name => {
-					formData.value.name = name;
-				});
-			} else if (type === 'idCard') {
-				window.pywebview.api.randomIdCard(formData.value.gender, formData.value.birthday).then(idCard => {
-					formData.value.idCard = idCard;
-				});
-			} else if (type === 'phone') {
-				window.pywebview.api.randomPhoneNumber().then(phone => {
-					formData.value.phone = phone;
-				});
-			} else if (type === 'email') {
-				window.pywebview.api.randomEmail().then(email => {
-					formData.value.email = email;
-				});
-			} else if (type === 'company') {
-				window.pywebview.api.randomCompanyName().then(company => {
-					formData.value.company = company;
-				});
-			} else if (type === 'socialCreditCode') {
-				window.pywebview.api.randomSocialCreditCode().then(socialCreditCode => {
-					formData.value.socialCreditCode = socialCreditCode;
-				});
-			} else if (type === 'organizationCode') {
-				window.pywebview.api.randomOrganizationCode().then(organizationCode => {
-					formData.value.organizationCode = organizationCode;
-				});
-			} else if (type === 'zhongzhengCode') {
-				window.pywebview.api.randomZhongzhengCode().then(zhongzhengCode => {
-					formData.value.zhongzhengCode = zhongzhengCode;
-				});
-			} else if (type === 'BOC') {
-				window.pywebview.api.randomBankAccount(type).then(bankAccount => {
-					formData.value.BOC = bankAccount;
-				});
-			} else if (type === 'CCB') {
-				window.pywebview.api.randomBankAccount(type).then(bankAccount => {
-					formData.value.CCB = bankAccount;
-				});
-			} else if (type === 'ABC') {
-				window.pywebview.api.randomBankAccount(type).then(bankAccount => {
-					formData.value.ABC = bankAccount;
-				});
-			} else if (type === 'ICBC') {
-				window.pywebview.api.randomBankAccount(type).then(bankAccount => {
-					formData.value.ICBC = bankAccount;
-				});
-			} else if (type === 'PSBC') {
-				window.pywebview.api.randomBankAccount(type).then(bankAccount => {
-					formData.value.PSBC = bankAccount;
-				});
-			} else if (type === 'all') {
-				Object.keys(personalInfoFields).forEach(field => {
-					generator(field);
-				});
-				Object.keys(companyInfoFields).forEach(field => {
-					generator(field);
-				});
-				Object.keys(accountInfoFields).forEach(field => {
-					generator(field);
-				});
-
-				//随机生日
-				formData.value.birthday = moment()
-					.year(Math.floor(Math.random() * (2000 - 1960 + 1)) + 1960)
-					.dayOfYear(Math.floor(Math.random() * 365) + 1)
-					.format('YYYY-MM-DD');
-			}
-		} catch (error) {
-			console.error('generator');
-			return;
-		}
-
-		setTimeout(async () => {
-			formLoading.value = false;
-			if (!isInit && type === 'all') {
-				residuePercent.value = Math.max(residuePercent.value - 1, 0);
-				//residuePercent.value = Math.max(residuePercent.value - residuePercent.value, 0);	// 测试用一次扣完
-				localStorage.setItem('nbBalance', residuePercent.value);
-				//getTangDaren();
-			}
-		}, 500);
+	function setFormLoading(val) {
+		formLoading.value = val;
 	}
 
-	function copy(field) {
-		const text = formData.value[field];
-		copyToClipboard(text);
+	function consumeNb(val) {
+		residuePercent.value = Math.max(residuePercent.value - val, 0);
+		localStorage.setItem('nbBalance', residuePercent.value);
 	}
 
 	// 检查余额
@@ -487,90 +228,9 @@
 		return false;
 	}
 
-	function resetForm() {
-		formData.value = {
-			gender: Math.random() > 0.5 ? 1 : 0,
-			birthday: '1992-07-25',
-			name: '',
-			phone: '',
-			email: '',
-			idCard: '',
-			company: '',
-			socialCreditCode: '',
-			organizationCode: '',
-			zhongzhengCode: '',
-			BOC: '',
-			CCB: '',
-			ABC: '',
-			ICBC: '',
-			PSBC: '',
-		};
-	}
 
-	function generateIdCardImage() {
-		if (checkNbBalance(false, 1)) {
-			return;
-		}
 
-		formLoading.value = true;
-		setTimeout(() => {
-			try {
-				window.pywebview.api
-					.generateIdCardImage(formData.value.name, formData.value.gender, formData.value.birthday, formData.value.idCard, windowConfig.value.directoryPath)
-					.then(idCardImage => {
-						ElMessage({
-							message: idCardImage,
-							type: 'success',
-						});
-					})
-					.catch(error => {
-						ElMessage({
-							message: error,
-							type: 'error',
-						});
-					});
 
-				residuePercent.value = residuePercent.value - 2;
-				localStorage.setItem('nbBalance', residuePercent.value);
-			} catch (error) {
-				console.error('generateIdCardImage');
-			}
-
-			formLoading.value = false;
-		}, 1000);
-	}
-
-	function generateBusinessImage() {
-		if (checkNbBalance(false, 1)) {
-			return;
-		}
-
-		formLoading.value = true;
-		setTimeout(() => {
-			try {
-				window.pywebview.api
-					.generateBusinessImage(formData.value.company, formData.value.socialCreditCode, formData.value.name, windowConfig.value.directoryPath)
-					.then(businessImage => {
-						ElMessage({
-							message: businessImage,
-							type: 'success',
-						});
-					})
-					.catch(error => {
-						ElMessage({
-							message: error,
-							type: 'error',
-						});
-					});
-				residuePercent.value = residuePercent.value - 2;
-				localStorage.setItem('nbBalance', residuePercent.value);
-			} catch (error) {
-				console.error('generateBusinessImage');
-			}
-
-			formLoading.value = false;
-		}, 1000);
-	}
 
 	function putCoins() {
 		let nb = Math.floor(Math.random() * 100);
@@ -738,9 +398,9 @@
 		try {
 			if ('resize' == resizeApp) {
 				windowConfig.value.screenWidth = 1200;
-				windowConfig.value.screenHeight = 660;
+				windowConfig.value.screenHeight = 700;
 				saveWinSizeItem();
-				window.pywebview.api.resizeApp(1200, 660);
+				window.pywebview.api.resizeApp(1200, 700);
 			} else {
 				window.pywebview.api.resizeApp(windowConfig.value.screenWidth, windowConfig.value.screenHeight);
 			}
@@ -853,28 +513,5 @@
 	.app-from {
 		overflow: hidden;
 		/* padding: 0 15px; */
-	}
-
-	.slider-demo-block {
-		max-width: 600px;
-		display: flex;
-		align-items: center;
-	}
-	.slider-demo-block .el-slider {
-		margin-top: 0;
-		margin-left: 12px;
-	}
-	.slider-demo-block .demonstration {
-		font-size: 14px;
-		color: var(--el-text-color-secondary);
-		line-height: 44px;
-		flex: 1;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-		margin-bottom: 0;
-	}
-	.slider-demo-block .demonstration + .el-slider {
-		flex: 0 0 80%;
 	}
 </style>

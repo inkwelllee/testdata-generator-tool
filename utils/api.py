@@ -10,7 +10,7 @@ from backend.gen import numberGen
 from .cache_manager import clear_webview_cache, get_cache_info, format_size
 
 
-class Api:
+class Api(numberGen):
     def __init__(self) -> None:
         numberGen.__init__(self)
         self._window = None
@@ -48,6 +48,18 @@ class Api:
     
     def randomBankAccount(self, bankType):
         return numberGen.random_bank_account(self, bankType)
+    
+    def randomLicensePlate(self):
+        return numberGen.random_license_plate(self)
+    
+    def randomVIN(self):
+        return numberGen.random_vin(self)
+    
+    def randomEngineNo(self):
+        return numberGen.random_engine_no(self)
+    
+    def randomAddress(self):
+        return numberGen.random_address(self)
     
     def generateIdCardImage(self, name, sex, birth_date, idCard, directoryPath):
         return numberGen.handle_image(self, name, sex, birth_date, idCard, directoryPath)

@@ -320,20 +320,44 @@ class numberGen:
         bank_card_no = generate_bank_card(self, 'PSBC')
 
         set_entry_value(self.psbccode, bank_card_no)
-
-    def generatorAll(self):
-        self.random_name()
-        self.random_phone_number()
-        self.random_id_card()
-        self.random_company_name()
-        self.random_credit_code()
-        self.random_organ_code()
-        self.random_pbc_code()
         self.random_boc_code()
         self.random_ccb_code()
         self.random_abc_code()
         self.random_icbc_code()
         self.random_psbc_code()
+
+    # 车牌号
+    def random_license_plate(self):
+        provinces = ["京", "津", "沪", "渝", "冀", "豫", "云", "辽", "黑", "湘", "皖", "鲁", "新", "苏", "浙", "赣", "鄂", "桂", "甘", "晋", "蒙", "陕", "吉", "闽", "贵", "粤", "青", "藏", "川", "宁", "琼"]
+        province = random.choice(provinces)
+        alpha = random.choice("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+        alphanumeric = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        suffix = "".join(random.choice(alphanumeric) for _ in range(5))
+        return province + alpha + suffix
+
+    # 车架号 (VIN)
+    def random_vin(self):
+        # 简单生成17位VIN
+        chars = "0123456789ABCDEFGHJKLMNPRSTUVWXYZ"
+        vin = "".join(random.choice(chars) for _ in range(17))
+        return vin
+
+    # 发动机号
+    def random_engine_no(self):
+        # 简单生成发动机号
+        chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        engine_no = "".join(random.choice(chars) for _ in range(random.randint(6, 10)))
+        return engine_no
+
+    # 地址
+    def random_address(self):
+        # 随机选择一个地址
+        address = random.choice(list(self.config.area_info.values()))
+        # 增加详细地址
+        road_names = ["人民路", "建设路", "解放路", "和平路", "文化路", "中山路", "北京路", "上海路"]
+        road = random.choice(road_names)
+        number = random.randint(1, 999)
+        return f"{address}{road}{number}号"
 
     def resetAll(self):
         for entry in self.entries:
