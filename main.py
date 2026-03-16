@@ -5,9 +5,9 @@ import webview
 import logging
 
 # 导入自定义模块
-from utils.logger import setup_logging, log_startup_info
-from utils.api import Api
-from utils.cache_manager import clear_webview_cache
+from src.utils.logger import setup_logging, log_startup_info
+from src.utils.api import Api
+from src.utils.cache_manager import clear_webview_cache
 
 # 配置选项
 CONFIG = {
@@ -75,8 +75,8 @@ def main():
     #window = webview.create_window(title='BlingBling', url='http://localhost:8098', width=initWidth, height=initHeight, js_api=api, resizable=True, text_select=False, confirm_close=False, frameless=True, easy_drag=False)
     #window = webview.create_window(title='BlingBling', url='http://inkwell.top/gen_ui', width=initWidth, height=initHeight, js_api=api, resizable=True, text_select=False, confirm_close=False, frameless=True, easy_drag=False)
     window = webview.create_window(
-        'BlingBling', 
-        'asserts/ui/index.html', 
+        'BlingBling',
+        'assets/ui/index.html', 
         width=initWidth, 
         height=initHeight, 
         js_api=api, 

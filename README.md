@@ -6,62 +6,66 @@
 
 ```
 testdata-generator-tool/
-├── asserts/                          # 资源文件目录
-│   ├── fonts/                        # 字体文件目录
-│   │   ├── hei.ttf                   # 黑体字体
-│   │   ├── ocrb10bt.ttf              # OCR-B字体
-│   │   └── fzhei.ttf                 # 仿宋字体
-│   ├── images/                       # 图片资源目录
-│   │   ├── business_license.png      # 营业执照模板
-│   │   ├── empty.png                 # 空白身份证模板
-│   │   ├── liuyf.jpg                 # 女神刘亦菲
-│   │   └── pengyy.jpeg               # 男神彭于晏
-│   ├── ui/                           # 前端构建产物目录 (自动生成)
-│   │   ├── assets/                   # 前端资源文件
-│   │   ├── festival/                 # 节日动画文件
-│   │   └── index.html                # 主页面文件
-│   ├── areaCode.txt                  # 地区编码数据
-│   ├── ico.icns                      # Mac应用图标
-│   └── ico.ico                       # Windows应用图标
-├── backend/                          # 后端Python目录
-│   ├── config/                       # 配置文件目录
-│   │   ├── __init__.py               # 包初始化文件
-│   │   ├── config_manager.py         # 配置管理器
-│   │   └── constants.py              # 常量配置
-│   ├── __init__.py                   # 包初始化文件
-│   └── gen.py                        # 数据生成工具类
-├── gui/                              # 前端Vue项目目录
-│   ├── src/                          # Vue源码目录
-│   │   ├── components/               # Vue组件目录
-│   │   │   └── FestivalAnimation.vue # 节日动画组件
-│   │   ├── views/                    # 页面组件目录
-│   │   │   ├── generator.vue         # 主生成器页面
-│   │   │   └── index.vue             # 首页
-│   │   ├── assets/                   # 前端资源文件
-│   │   ├── router/                   # 路由配置
-│   │   ├── utils/                    # 前端工具函数
-│   │   ├── App.vue                   # 根组件
-│   │   └── main.js                   # 入口文件
-│   ├── scripts/                      # 构建脚本目录
-│   │   ├── copy-to-ui.js             # Node.js复制脚本
-│   │   ├── copy-to-ui.bat            # Windows批处理脚本
-│   │   └── copy-to-ui.sh             # Unix/Linux脚本
-│   ├── dist/                         # 构建输出目录 (自动生成)
-│   ├── package.json                  # 前端依赖配置
-│   ├── vite.config.js                # Vite构建配置
-│   └── vite-plugin-copy-to-ui.js     # 自动复制插件
-├── utils/                            # 工具模块目录
-│   ├── __init__.py                   # 包初始化文件
-│   ├── api.py                        # API类模块
-│   ├── cache_manager.py              # 缓存管理模块
-│   └── logger.py                     # 日志配置模块
-├── logs/                             # 日志文件目录 (自动生成)
-│   └── output.log                    # 应用日志文件
-├── images/                           # 效果图目录
-├── main.py                           # 主程序入口文件
-├── CONFIG.md                         # 配置说明文档
-├── .gitignore                        # Git忽略文件配置
-└── README.md                         # 项目说明文档
+├── src/                               # 源码目录
+│   ├── generators/                    # 数据生成器模块
+│   │   ├── __init__.py                # 模块导出
+│   │   ├── data_generator.py          # 生成器基类
+│   │   ├── id_generator.py            # 身份证生成器
+│   │   ├── phone_generator.py         # 手机号/邮箱生成器
+│   │   ├── company_generator.py       # 公司信息生成器
+│   │   ├── bank_generator.py          # 银行卡生成器
+│   │   ├── vehicle_generator.py       # 车辆信息生成器
+│   │   └── personal_generator.py      # 个人信息生成器
+│   ├── services/                      # 服务模块
+│   │   ├── __init__.py                # 模块导出
+│   │   ├── image_service.py           # 图片生成服务
+│   │   └── path_service.py            # 路径服务
+│   ├── configs/                       # 配置模块
+│   │   ├── __init__.py                # 模块导出
+│   │   ├── config_manager.py          # 配置管理器
+│   │   └── constants.py               # 常量配置
+│   ├── utils/                         # 工具模块
+│   │   ├── __init__.py                # 模块导出
+│   │   ├── api.py                     # API接口
+│   │   ├── cache_manager.py           # 缓存管理
+│   │   └── logger.py                  # 日志配置
+│   └── __init__.py                    # 源码模块导出
+├── tests/                             # 测试目录
+│   ├── __init__.py
+│   └── test_generators.py             # 生成器测试
+├── assets/                            # 资源文件目录
+│   ├── fonts/                         # 字体文件目录
+│   │   ├── hei.ttf                    # 黑体字体
+│   │   ├── ocrb10bt.ttf               # OCR-B字体
+│   │   └── fzhei.ttf                  # 仿宋字体
+│   ├── images/                        # 图片资源目录
+│   │   ├── business_license.png       # 营业执照模板
+│   │   ├── empty.png                  # 空白身份证模板
+│   │   ├── liuyf.jpg                  # 女性头像
+│   │   └── pengyy.jpeg                # 男性头像
+│   ├── ui/                            # 前端构建产物目录 (自动生成)
+│   │   ├── assets/                    # 前端资源文件
+│   │   ├── festival/                  # 节日动画文件
+│   │   └── index.html                 # 主页面文件
+│   ├── areaCode.txt                   # 地区编码数据
+│   ├── ico.icns                       # Mac应用图标
+│   └── ico.ico                        # Windows应用图标
+├── gui/                               # 前端Vue项目目录
+│   ├── src/                           # Vue源码目录
+│   │   ├── components/                # Vue组件目录
+│   │   ├── views/                     # 页面组件目录
+│   │   ├── assets/                    # 前端资源文件
+│   │   ├── router/                    # 路由配置
+│   │   ├── App.vue                    # 根组件
+│   │   └── main.js                    # 入口文件
+│   ├── package.json                   # 前端依赖配置
+│   └── vite.config.js                 # Vite构建配置
+├── logs/                              # 日志文件目录 (自动生成)
+├── images/                            # 效果图目录
+├── main.py                            # 主程序入口文件
+├── requirements.txt                   # Python依赖配置
+├── CONFIG.md                          # 配置说明文档
+└── README.md                          # 项目说明文档
 ```
 
 ## 架构特性
@@ -94,18 +98,11 @@ testdata-generator-tool/
 
 ### Python 依赖
 ```bash
-# 剪切板操作
-pip install pyperclip
+# 使用 requirements.txt 安装依赖
+pip install -r requirements.txt
 
-# 图像处理
-pip install opencv-python
-pip install Pillow
-
-# 数组计算
-pip install numpy
-
-# WebView支持
-pip install pywebview
+# 或手动安装
+pip install pywebview pyperclip Pillow opencv-python numpy
 ```
 
 ### 前端依赖 (可选，仅开发时需要)
@@ -162,6 +159,18 @@ CONFIG = {
 }
 ```
 
+### 运行测试
+```bash
+# 安装测试依赖
+pip install pytest
+
+# 运行所有测试
+pytest tests/
+
+# 运行单个测试文件
+pytest tests/test_generators.py -v
+```
+
 ## 打包程序
 
 ### 准备工作
@@ -181,17 +190,17 @@ CONFIG = {
 
 #### Windows 打包
 ```bash
-pyinstaller -i asserts/ico.ico --name 测试数据生成器 --windowed --clean --noconfirm --onefile --add-data "asserts;asserts" main.py
+pyinstaller -i assets/ico.ico --name 测试数据生成器 --windowed --clean --noconfirm --onefile --add-data "assets;assets" main.py
 ```
 
 #### Mac 打包
 ```bash
-pyinstaller -i asserts/ico.icns --name 测试数据生成器 --windowed --clean --noconfirm --onefile --add-data ./asserts:./asserts main.py
+pyinstaller -i assets/ico.icns --name 测试数据生成器 --windowed --clean --noconfirm --onefile --add-data ./assets:./assets main.py
 ```
 
 #### Linux 打包
 ```bash
-pyinstaller --name 测试数据生成器 --windowed --clean --noconfirm --onefile --add-data "./asserts:./asserts" main.py
+pyinstaller --name 测试数据生成器 --windowed --clean --noconfirm --onefile --add-data "./assets:./assets" main.py
 ```
 
 ### 打包说明
@@ -205,7 +214,7 @@ pyinstaller --name 测试数据生成器 --windowed --clean --noconfirm --onefil
 ### 前端开发
 - 前端使用Vue 3 + Element Plus开发
 - 支持热重载开发模式
-- 构建完成后自动复制到 `asserts/ui/` 目录
+- 构建完成后自动复制到 `assets/ui/` 目录
 - 节日动画组件支持特定日期显示
 
 ### 后端开发  

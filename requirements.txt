@@ -1,0 +1,17 @@
+# 测试数据生成器依赖
+
+# WebView 支持
+pywebview>=6.0
+
+# 剪贴板操作
+pyperclip>=1.8
+
+# 图像处理
+Pillow>=10.0
+opencv-python>=4.8
+
+# 数值计算
+numpy>=1.24
+
+# 测试依赖
+pytest>=8.0
