@@ -1,5 +1,5 @@
 """
-测试数据生成器
+开心果 - 测试数据生成器
 """
 from .generators import (
     IDGenerator,

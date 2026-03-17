@@ -50,8 +50,6 @@ export function useGenerator(type) {
 
 	// 生成单个字段
 	async function generateField(field, isInit = false) {
-		if (appStore.checkNbBalance(isInit)) return;
-
 		appStore.setLoading(true);
 
 		try {
@@ -71,11 +69,6 @@ export function useGenerator(type) {
 
 	// 生成所有字段
 	async function generateAll(isInit = false) {
-		// 处理事件对象（点击按钮时会传入 PointerEvent）
-		const isInitFlag = isInit === true;
-
-		if (appStore.checkNbBalance(isInitFlag)) return;
-
 		const config = getConfig();
 		if (!config) return;
 
@@ -97,10 +90,6 @@ export function useGenerator(type) {
 			// 基础信息生成时随机生日
 			if (type === 'basic') {
 				generatorStore.randomizeBirthday();
-			}
-
-			if (!isInitFlag) {
-				appStore.consumeNb(1);
 			}
 		} catch (error) {
 			console.error('generateAll:', error);
@@ -144,8 +133,6 @@ export function useFullGenerator() {
 
 	// 生成基础信息
 	async function generateBasic(field, isInit = false) {
-		if (appStore.checkNbBalance(isInit)) return;
-
 		appStore.setLoading(true);
 
 		try {
@@ -175,8 +162,6 @@ export function useFullGenerator() {
 
 	// 生成企业信息
 	async function generateCompany(field, isInit = false) {
-		if (appStore.checkNbBalance(isInit)) return;
-
 		appStore.setLoading(true);
 
 		try {
@@ -207,8 +192,6 @@ export function useFullGenerator() {
 
 	// 生成账号信息
 	async function generateAccount(field, isInit = false) {
-		if (appStore.checkNbBalance(isInit)) return;
-
 		appStore.setLoading(true);
 
 		try {
@@ -237,8 +220,6 @@ export function useFullGenerator() {
 
 	// 生成车辆信息
 	async function generateVehicle(field, isInit = false) {
-		if (appStore.checkNbBalance(isInit)) return;
-
 		appStore.setLoading(true);
 
 		try {
@@ -267,11 +248,6 @@ export function useFullGenerator() {
 
 	// 生成所有信息
 	async function generateAll(isInit = false) {
-		// 处理事件对象（点击按钮时会传入 PointerEvent）
-		const isInitFlag = isInit === true;
-
-		if (appStore.checkNbBalance(isInitFlag)) return;
-
 		appStore.setLoading(true);
 
 		try {
@@ -282,10 +258,6 @@ export function useFullGenerator() {
 				generateAccount('all', true),
 				generateVehicle('all', true),
 			]);
-
-			if (!isInitFlag) {
-				appStore.consumeNb(1);
-			}
 		} catch (error) {
 			console.error('generateAll:', error);
 		} finally {

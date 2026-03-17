@@ -184,11 +184,14 @@ class Api:
         Returns:
             目录路径
         """
+        logging.info(f"[changeDirectory] 收到请求, directoryType={directoryType}")
+        result = ''
         if directoryType == 'desktop':
-            return self._path_service.get_desktop_path()
+            result = self._path_service.get_desktop_path()
         elif directoryType == 'follow':
-            return self._path_service.get_current_dir()
-        return ''
+            result = self._path_service.get_current_dir()
+        logging.info(f"[changeDirectory] 返回路径: {result}")
+        return result
 
     def checkPath(self, directoryPath: str) -> bool:
         """检查路径是否存在"""

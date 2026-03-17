@@ -45,8 +45,6 @@ const appStore = useAppStore();
 const generatorStore = useGeneratorStore();
 
 async function generate(field) {
-	if (appStore.checkNbBalance(false)) return;
-
 	appStore.setLoading(true);
 	try {
 		if (generatorStore.vehicleApiMap[field]) {
@@ -63,10 +61,6 @@ async function generate(field) {
 }
 
 async function generateAll(isInit = false) {
-	const isInitFlag = isInit === true;
-
-	if (appStore.checkNbBalance(isInitFlag)) return;
-
 	appStore.setLoading(true);
 
 	try {
@@ -77,10 +71,6 @@ async function generateAll(isInit = false) {
 		});
 
 		await Promise.all(promises);
-
-		if (!isInitFlag) {
-			appStore.consumeNb(1);
-		}
 	} catch (error) {
 		console.error('generateAll:', error);
 	} finally {

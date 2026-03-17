@@ -169,8 +169,6 @@ const genderOptions = [
 ];
 
 async function generate(field) {
-	if (appStore.checkNbBalance(false)) return;
-
 	appStore.setLoading(true);
 	try {
 		let value;
@@ -194,10 +192,6 @@ async function generate(field) {
 }
 
 async function generateAll(isInit = false) {
-	const isInitFlag = isInit === true;
-
-	if (appStore.checkNbBalance(isInitFlag)) return;
-
 	appStore.setLoading(true);
 
 	try {
@@ -230,10 +224,6 @@ async function generateAll(isInit = false) {
 		await Promise.all(promises);
 
 		generatorStore.randomizeBirthday();
-
-		if (!isInitFlag) {
-			appStore.consumeNb(1);
-		}
 	} catch (error) {
 		console.error('generateAll:', error);
 	} finally {
@@ -250,8 +240,6 @@ function resetAll() {
 }
 
 async function generateIdCardImage() {
-	if (appStore.checkNbBalance(false, 1)) return;
-
 	appStore.setLoading(true);
 
 	try {
@@ -262,18 +250,15 @@ async function generateIdCardImage() {
 			generatorStore.basicInfo.idCard,
 			appStore.directoryPath
 		);
-		$q.notify({ message: result, color: 'positive', position: 'top' });
-		appStore.consumeNb(2);
+		$q.notify({ message: result, color: 'grey-7', textColor: 'white', position: 'top', timeout: 800, classes: 'compact-notify' });
 	} catch (error) {
-		$q.notify({ message: error, color: 'negative', position: 'top' });
+		$q.notify({ message: error, color: 'grey-7', textColor: 'white', position: 'top', timeout: 800, classes: 'compact-notify' });
 	} finally {
 		appStore.setLoading(false);
 	}
 }
 
 async function generateBusinessImage() {
-	if (appStore.checkNbBalance(false, 1)) return;
-
 	appStore.setLoading(true);
 
 	try {
@@ -283,10 +268,9 @@ async function generateBusinessImage() {
 			generatorStore.basicInfo.name,
 			appStore.directoryPath
 		);
-		$q.notify({ message: result, color: 'positive', position: 'top' });
-		appStore.consumeNb(2);
+		$q.notify({ message: result, color: 'grey-7', textColor: 'white', position: 'top', timeout: 800, classes: 'compact-notify' });
 	} catch (error) {
-		$q.notify({ message: error, color: 'negative', position: 'top' });
+		$q.notify({ message: error, color: 'grey-7', textColor: 'white', position: 'top', timeout: 800, classes: 'compact-notify' });
 	} finally {
 		appStore.setLoading(false);
 	}

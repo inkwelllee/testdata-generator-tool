@@ -39,4 +39,18 @@ html, body {
 .notify-toast .q-notification__message {
 	font-size: 13px;
 }
+
+/* 紧凑通知样式 */
+.compact-notify {
+	min-height: 0 !important;
+	padding: 6px 12px !important;
+	border-radius: 4px !important;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+.compact-notify .q-notification__message {
+	font-size: 12px !important;
+	padding: 0 !important;
+}
+
 </style>

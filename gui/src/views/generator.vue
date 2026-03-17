@@ -13,7 +13,7 @@
 		<div class="app-header">
 			<div class="header-left">
 				<img src="@/assets/icons/logo.svg" @click.stop="appStore.winSetUp = true" style="width: 24px; height: 24px; -webkit-user-drag: none" />
-				<span class="app-title">测试数据生成器</span>
+				<span class="app-title">开心果</span>
 			</div>
 			<div class="header-right">
 				<q-toggle
@@ -116,10 +116,12 @@ if (savedDark !== null) {
 async function toggleAlwaysOnTop() {
 	await appStore.toggleAlwaysOnTop();
 	$q.notify({
-		message: appStore.alwaysOnTop ? '窗口已置顶' : '窗口已取消置顶',
-		color: 'positive',
+		message: appStore.alwaysOnTop ? '已置顶' : '已取消置顶',
+		color: 'grey-7',
+		textColor: 'white',
 		position: 'top',
-		timeout: 1000
+		timeout: 800,
+		classes: 'compact-notify'
 	});
 }
 
@@ -193,11 +195,37 @@ function stopResize() {
 	document.removeEventListener('mouseup', stopResize);
 }
 
+// 等待 pywebview 就绪
+function waitForPywebview(timeout = 5000) {
+	return new Promise((resolve, reject) => {
+		if (window.pywebview && window.pywebview.api) {
+			resolve();
+			return;
+		}
+
+		const startTime = Date.now();
+		const checkInterval = setInterval(() => {
+			if (window.pywebview && window.pywebview.api) {
+				clearInterval(checkInterval);
+				resolve();
+			} else if (Date.now() - startTime > timeout) {
+				clearInterval(checkInterval);
+				reject(new Error('pywebview timeout'));
+			}
+		}, 50);
+	});
+}
+
 onMounted(async () => {
-	windowApi.resize(appStore.screenWidth, appStore.screenHeight);
-	const alwaysOnTop = await windowApi.getAlwaysOnTop();
-	appStore.initAlwaysOnTop(alwaysOnTop);
-	appStore.changeDirectory(appStore.directoryType, true);
+	try {
+		await waitForPywebview();
+		windowApi.resize(appStore.screenWidth, appStore.screenHeight);
+		const alwaysOnTop = await windowApi.getAlwaysOnTop();
+		appStore.initAlwaysOnTop(alwaysOnTop);
+		await appStore.changeDirectory(appStore.directoryType, true);
+	} catch (e) {
+		console.error('pywebview 初始化超时:', e);
+	}
 });
 
 onUnmounted(() => {
@@ -210,14 +238,20 @@ async function handleCheckPath(isInit = false) {
 	if (isValid && !isInit) {
 		$q.notify({
 			message: '修改目录成功',
-			color: 'positive',
+			color: 'grey-7',
+			textColor: 'white',
 			position: 'top',
+			timeout: 800,
+			classes: 'compact-notify'
 		});
 	} else if (!isValid) {
 		$q.notify({
 			message: '目录不存在，应用目录失败',
-			color: 'negative',
+			color: 'grey-7',
+			textColor: 'white',
 			position: 'top',
+			timeout: 800,
+			classes: 'compact-notify'
 		});
 	}
 }
@@ -226,8 +260,11 @@ function winSetUpBeforeClose(done) {
 	if (appStore.directoryType === 'diy' && !appStore.enablePath) {
 		$q.notify({
 			message: '请先检测自定义目录是否可用',
-			color: 'warning',
+			color: 'grey-7',
+			textColor: 'white',
 			position: 'top',
+			timeout: 800,
+			classes: 'compact-notify'
 		});
 		return;
 	}

@@ -101,7 +101,14 @@ function resetSize() {
 	appStore.screenHeight = 385;
 	appStore.saveWindowSize();
 	windowApi.resize(750, 385);
-	$q.notify({ message: '已还原默认大小', color: 'positive', position: 'top' });
+	$q.notify({
+		message: '已还原默认大小',
+		color: 'grey-7',
+		textColor: 'white',
+		position: 'top',
+		timeout: 800,
+		classes: 'compact-notify'
+	});
 }
 
 function handleVersionClick() {
@@ -118,7 +125,7 @@ function handleVersionClick() {
 		try {
 			if (window.pywebview) {
 				window.pywebview.api.clearCache().then(res => {
-					$q.notify({ message: res, color: 'positive', position: 'top' });
+					$q.notify({ message: res, color: 'grey-7', textColor: 'white', position: 'top', timeout: 800, classes: 'compact-notify' });
 				});
 			}
 		} catch (e) {
