@@ -31,3 +31,6 @@ output.log
 
 # 临时/缓存文件
 *.local
+
+# 窗口配置文件
+window_config.json
