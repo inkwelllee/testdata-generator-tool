@@ -33,6 +33,8 @@ export const windowApi = {
 	maximize: () => window.pywebview.api.maximizeApp(),
 	restore: () => window.pywebview.api.restoreApp(),
 	resize: (width, height) => window.pywebview.api.resizeApp(width, height),
+	toggleAlwaysOnTop: () => window.pywebview.api.toggleAlwaysOnTop(),
+	getAlwaysOnTop: () => window.pywebview.api.getAlwaysOnTop(),
 };
 
 // 路径 API

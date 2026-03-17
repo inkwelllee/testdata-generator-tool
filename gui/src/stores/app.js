@@ -6,6 +6,7 @@ export const useAppStore = defineStore('app', () => {
 	// 窗口配置
 	const winSetUp = ref(false);
 	const restoreWindow = ref(false);
+	const alwaysOnTop = ref(false);  // 初始化为 false，在 onMounted 中从后端获取
 	const screenWidth = ref((localStorage.getItem('screenWidth') || 750) * 1);
 	const screenHeight = ref((localStorage.getItem('screenHeight') || 385) * 1);
 	const maxScreenWidth = ref(window.screen.width * window.devicePixelRatio || 1920);
@@ -74,6 +75,15 @@ export const useAppStore = defineStore('app', () => {
 	function saveWindowSize() {
 		localStorage.setItem('screenWidth', screenWidth.value);
 		localStorage.setItem('screenHeight', screenHeight.value);
+	}
+
+	async function toggleAlwaysOnTop() {
+		const newState = await windowApi.toggleAlwaysOnTop();
+		alwaysOnTop.value = newState;
+	}
+
+	function initAlwaysOnTop(state) {
+		alwaysOnTop.value = state;
 	}
 
 	function destroy() {
@@ -181,6 +191,7 @@ export const useAppStore = defineStore('app', () => {
 		// 状态
 		winSetUp,
 		restoreWindow,
+		alwaysOnTop,
 		screenWidth,
 		screenHeight,
 		maxScreenWidth,
@@ -202,6 +213,8 @@ export const useAppStore = defineStore('app', () => {
 		// 方法
 		minimize,
 		toggleMaximize,
+		toggleAlwaysOnTop,
+		initAlwaysOnTop,
 		resize,
 		saveWindowSize,
 		destroy,

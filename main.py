@@ -3,10 +3,21 @@ import os
 import sys
 import webview
 import logging
+import ctypes
+
+# 设置 DPI 感知（必须在创建窗口前设置）
+if sys.platform == 'win32':
+    try:
+        ctypes.windll.shcore.SetProcessDpiAwareness(2)  # PROCESS_PER_MONITOR_DPI_AWARE
+    except Exception:
+        try:
+            ctypes.windll.user32.SetProcessDPIAware()
+        except Exception:
+            pass
 
 # 导入自定义模块
 from src.utils.logger import setup_logging, log_startup_info
-from src.utils.api import Api
+from src.utils.api import Api, load_window_config
 from src.utils.cache_manager import clear_webview_cache
 
 # 配置选项
@@ -59,42 +70,61 @@ def main():
     # 系统分辨率
     screens = webview.screens
     screens = screens[0]
-    width = screens.width
-    logging.info("程序开始执行 => width")
-    
+    screenWidth = screens.width
+    screenHeight = screens.height
+    logging.info("程序开始执行 => screens")
+
     # 窗口大小
     initWidth = 750
     initHeight = 385
-    logging.info("程序开始执行 => initHeight")
+
+    # 计算窗口居中位置
+    posX = int((screenWidth - initWidth) / 2)
+    posY = int((screenHeight - initHeight) / 2)
+    logging.info("程序开始执行 => window position")
     
     # 设置MIME类型
     mimetypes.add_type('application/javascript', '.js')
     logging.info("程序开始执行 => mimetypes")
-    
+
+    # 读取窗口配置
+    window_config = load_window_config()
+    always_on_top = window_config.get('alwaysOnTop', False)
+    logging.info(f"窗口置顶状态: {always_on_top}")
+
     # 创建窗口
-    window = webview.create_window(title='BlingBling', url='http://localhost:8098', width=initWidth, height=initHeight, js_api=api, resizable=True, text_select=False, confirm_close=False, frameless=True, easy_drag=False)
-    #window = webview.create_window(title='BlingBling', url='http://inkwell.top/gen_ui', width=initWidth, height=initHeight, js_api=api, resizable=True, text_select=False, confirm_close=False, frameless=True, easy_drag=False)
-    # window = webview.create_window(
-    #     'BlingBling',
-    #     'assets/ui/index.html', 
-    #     width=initWidth, 
-    #     height=initHeight, 
-    #     js_api=api, 
-    #     resizable=True, 
-    #     text_select=False, 
-    #     confirm_close=False, 
-    #     frameless=True, 
-    #     easy_drag=False
-    # )
+    #window = webview.create_window(title='BlingBling', url='http://localhost:8098', width=initWidth, height=initHeight, x=posX, y=posY, js_api=api, resizable=True, on_top=always_on_top, text_select=False, confirm_close=False, frameless=True, easy_drag=False)
+    #window = webview.create_window(title='BlingBling', url='http://inkwell.top/gen_ui', width=initWidth, height=initHeight, js_api=api, resizable=True, on_top=always_on_top, text_select=False, confirm_close=False, frameless=True, easy_drag=False)
+    window = webview.create_window(
+        'BlingBling',
+        'assets/ui/index.html', 
+        width=initWidth, 
+        height=initHeight, 
+        x=posX,
+        y=posY,
+        js_api=api, 
+        resizable=True, 
+        on_top=always_on_top,
+        text_select=False, 
+        confirm_close=False, 
+        frameless=True, 
+        easy_drag=False
+    )
     logging.info("程序开始执行 => window")
     
     api.set_window(window)
     logging.info("程序开始执行 => api.set_window(window)")
-    
+
+    # 窗口显示后调整大小（修复 DPI 缩放问题）
+    def on_shown():
+        window.resize(initWidth, initHeight)
+        logging.info("窗口大小已调整")
+
     # 启动webview
     webview.start(
-        localization=chinese, 
-        http_server=True, 
+        on_shown,
+        localization=chinese,
+        http_server=True,
         private_mode=False,
         gui=None,
         debug=False

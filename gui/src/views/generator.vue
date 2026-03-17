@@ -35,6 +35,7 @@
 					size="sm"
 					class="q-mr-sm"
 				/>
+				<q-btn flat round dense icon="push_pin" :color="appStore.alwaysOnTop ? 'primary' : 'grey-6'" @click="toggleAlwaysOnTop" size="sm" :style="{ opacity: appStore.alwaysOnTop ? 1 : 0.5 }" />
 				<q-btn flat round dense icon="remove" color="grey-7" @click="minimize" size="sm" />
 				<q-btn flat round dense :icon="appStore.restoreWindow ? 'filter_none' : 'fullscreen'" color="warning" @click="toggleMaximize" size="sm" />
 				<q-btn flat round dense icon="close" color="negative" @click="exitAppTip = true" size="sm" />
@@ -185,6 +186,17 @@ if (savedDark !== null) {
 	isDark.value = Dark.isActive;
 }
 
+// 窗口置顶
+async function toggleAlwaysOnTop() {
+	await appStore.toggleAlwaysOnTop();
+	$q.notify({
+		message: appStore.alwaysOnTop ? '窗口已置顶' : '窗口已取消置顶',
+		color: 'positive',
+		position: 'top',
+		timeout: 1000
+	});
+}
+
 // ==================== 窗口缩放 ====================
 const resizeState = ref({
 	isResizing: false,
@@ -255,8 +267,11 @@ function stopResize() {
 	document.removeEventListener('mouseup', stopResize);
 }
 
-onMounted(() => {
+onMounted(async () => {
 	windowApi.resize(appStore.screenWidth, appStore.screenHeight);
+	// 从后端获取置顶状态
+	const alwaysOnTop = await windowApi.getAlwaysOnTop();
+	appStore.initAlwaysOnTop(alwaysOnTop);
 	appStore.changeDirectory(appStore.directoryType, true);
 	appStore.checkFestival();
 });
