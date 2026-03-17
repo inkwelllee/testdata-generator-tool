@@ -12,7 +12,7 @@
 		<!-- 固定顶部 -->
 		<div class="app-header">
 			<div class="header-left">
-				<img src="@/assets/icons/jiaoayi.ico" @click.stop="appStore.winSetUp = true" style="width: 24px; height: 24px; -webkit-user-drag: none" />
+				<img src="@/assets/icons/logo.svg" @click.stop="appStore.winSetUp = true" style="width: 24px; height: 24px; -webkit-user-drag: none" />
 				<span class="app-title">测试数据生成器</span>
 			</div>
 			<div class="header-right">

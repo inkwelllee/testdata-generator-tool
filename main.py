@@ -93,23 +93,23 @@ def main():
     logging.info(f"窗口置顶状态: {always_on_top}")
 
     # 创建窗口
-    #window = webview.create_window(title='BlingBling', url='http://localhost:8098', width=initWidth, height=initHeight, x=posX, y=posY, js_api=api, resizable=True, on_top=always_on_top, text_select=False, confirm_close=False, frameless=True, easy_drag=False)
+    window = webview.create_window(title='BlingBling', url='http://localhost:8098', width=initWidth, height=initHeight, x=posX, y=posY, js_api=api, resizable=True, on_top=always_on_top, text_select=False, confirm_close=False, frameless=True, easy_drag=False)
     #window = webview.create_window(title='BlingBling', url='http://inkwell.top/gen_ui', width=initWidth, height=initHeight, js_api=api, resizable=True, on_top=always_on_top, text_select=False, confirm_close=False, frameless=True, easy_drag=False)
-    window = webview.create_window(
-        'BlingBling',
-        'assets/ui/index.html', 
-        width=initWidth, 
-        height=initHeight, 
-        x=posX,
-        y=posY,
-        js_api=api, 
-        resizable=True, 
-        on_top=always_on_top,
-        text_select=False, 
-        confirm_close=False, 
-        frameless=True, 
-        easy_drag=False
-    )
+    #window = webview.create_window(
+    #    'BlingBling',
+    #    'assets/ui/index.html', 
+    #    width=initWidth, 
+    #    height=initHeight, 
+    #    x=posX,
+    #    y=posY,
+    #    js_api=api, 
+    #    resizable=True, 
+    #    on_top=always_on_top,
+    #    text_select=False, 
+    #    confirm_close=False, 
+    #    frameless=True, 
+    #    easy_drag=False
+    #)
     logging.info("程序开始执行 => window")
     
     api.set_window(window)
