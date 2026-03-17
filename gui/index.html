@@ -13,14 +13,14 @@
 	</body>
 
 	<style>
-		/* 拖动区域 */
+		/* pywebview 拖拽区域 - 从图标右侧开始，覆盖标题区域 */
 		.pywebview-drag-region {
-			height: 35px;
-			width: 150px;
-			left: 58px;
-			/* background-color: #ffffff;	 */
-			position: absolute;
-			z-index: 9999;
+			position: fixed;
+			top: 0;
+			left: 42px;
+			right: 160px;
+			height: 32px;
+			z-index: 1;
 		}
 	</style>
 </html>

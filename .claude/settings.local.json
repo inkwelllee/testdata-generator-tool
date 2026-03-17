@@ -18,7 +18,10 @@
       "Bash(mv:*)",
       "Bash(./venv/Scripts/python.exe -c \"\nfrom src.utils.api import Api\napi = Api\\(\\)\nprint\\('API初始化成功'\\)\nprint\\('姓名:', api.randomName\\(1\\)\\)\nprint\\('手机号:', api.randomPhoneNumber\\(\\)\\)\nprint\\('车牌号:', api.randomLicensePlate\\(\\)\\)\n\")",
       "Bash(./venv/Scripts/python.exe -c \"\nfrom src.services.path_service import PathService\nps = PathService\\(\\)\nprint\\('base_dir:', ps.base_dir\\)\nprint\\('fonts_dir:', ps.fonts_dir\\)\nprint\\('fonts exists:', ps.path_exists\\(ps.fonts_dir\\)\\)\nimport os\nprint\\('files:', os.listdir\\(ps.fonts_dir\\) if ps.path_exists\\(ps.fonts_dir\\) else 'NOT FOUND'\\)\n\")",
-      "Bash(./venv/Scripts/python.exe -c \"\nfrom src.configs import ConfigManager\nconfig = ConfigManager\\(\\)\nprint\\('image_config:', config.image_config\\)\nprint\\('fonts config:', config.image_config.get\\('FONTS', {}\\)\\)\n\")"
+      "Bash(./venv/Scripts/python.exe -c \"\nfrom src.configs import ConfigManager\nconfig = ConfigManager\\(\\)\nprint\\('image_config:', config.image_config\\)\nprint\\('fonts config:', config.image_config.get\\('FONTS', {}\\)\\)\n\")",
+      "Bash(git status:*)",
+      "Bash(git push:*)",
+      "Bash(cd:*)"
     ]
   }
 }

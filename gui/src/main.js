@@ -1,22 +1,29 @@
 import { createApp } from 'vue';
+import { createPinia } from 'pinia';
+import { Quasar, Notify, Dark, Dialog } from 'quasar';
 
-import ElementPlus from 'element-plus';
-import locale from 'element-plus/es/locale/lang/zh-cn';
+// Quasar 样式
+import '@quasar/extras/material-icons/material-icons.css';
+import 'quasar/src/css/index.sass';
 
-import 'element-plus/dist/index.css';
-import VueClipboard from 'vue-clipboard2';
-
-// import "./style.css";
-import 'element-plus/theme-chalk/dark/css-vars.css';
 import App from './App.vue';
 import { router } from './router/index';
 
 const app = createApp(App);
 
-app.use(ElementPlus, {
-	locale: locale,
+const pinia = createPinia();
+
+app.use(pinia);
+app.use(Quasar, {
+	plugins: { Notify, Dark, Dialog },
+	config: {
+		dark: 'auto', // 跟随系统
+		notify: {
+			position: 'top',
+			timeout: 2500,
+		}
+	}
 });
-app.use(VueClipboard);
 app.use(router);
 
 app.mount('#app');

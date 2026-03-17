@@ -1,357 +1,409 @@
 <template>
-	<el-row :gutter="15">
-		<el-col :span="8">
-			<el-card style="height: 500px">
-				<template #header>
-					<div class="card-header">
-						<span>身份信息</span>
+	<div class="generator-container">
+		<div class="card-grid">
+			<q-card flat bordered>
+				<q-card-section class="card-header q-pa-sm">
+					<div class="text-weight-bold text-body2">身份信息</div>
+				</q-card-section>
+				<q-card-section class="q-pa-sm">
+					<div class="row q-col-gutter-sm">
+						<div class="col-6">
+							<q-option-group
+								v-model="generatorStore.basicInfo.gender"
+								:options="genderOptions"
+								dense
+								inline
+								type="radio"
+							/>
+						</div>
+						<div class="col-6">
+							<q-input
+								v-model="generatorStore.basicInfo.birthday"
+								dense
+								borderless
+								class="input-field"
+								label="出生日期"
+							>
+								<template v-slot:append>
+									<q-icon name="event" class="cursor-pointer">
+										<q-popup-proxy cover transition-show="scale" transition-hide="scale">
+											<q-date
+												v-model="generatorStore.basicInfo.birthday"
+												mask="YYYY-MM-DD"
+												minimal
+											/>
+										</q-popup-proxy>
+									</q-icon>
+								</template>
+							</q-input>
+						</div>
 					</div>
-				</template>
-				<el-row :gutter="10">
-					<el-col :span="12">
-						<el-form-item label="性别">
-							<el-radio-group v-model="formData.gender">
-								<el-radio :value="1">男</el-radio>
-								<el-radio :value="0">女</el-radio>
-							</el-radio-group>
-						</el-form-item>
-					</el-col>
-					<el-col :span="12">
-						<el-form-item label="出生日期">
-							<el-date-picker v-model="formData.birthday" type="date" format="YYYY-MM-DD" value-format="YYYY-MM-DD"></el-date-picker>
-						</el-form-item>
-					</el-col>
-				</el-row>
-				<el-row :gutter="10" v-for="(label, field) in personalInfoFields" :key="field">
-					<el-col :span="24">
-						<el-form-item :label="label">
-							<el-col :span="24">
-								<el-input v-model="formData[field]" readonly @click="copy(field)" style="cursor: pointer">
-									<template #append>
-										<el-button :icon="Pointer" @click="generator(field)"></el-button>
-									</template>
-								</el-input>
-							</el-col>
-						</el-form-item>
-					</el-col>
-				</el-row>
-			</el-card>
-		</el-col>
-		<el-col :span="8">
-			<el-card style="height: 500px">
-				<template #header>
-					<div class="card-header">
-						<span>企业信息</span>
+					<div class="row q-col-gutter-sm" v-for="(label, field) in generatorStore.personalInfoFields" :key="field">
+						<div class="col-12">
+							<q-input
+								v-model="generatorStore.basicInfo[field]"
+								dense
+								borderless
+								class="input-field"
+								:label="label"
+								readonly
+								@click="copyToClipboard(generatorStore.basicInfo[field])"
+							>
+								<template v-slot:append>
+									<q-btn flat round dense icon="touch_app" size="sm" @click.stop="generate(field)" />
+								</template>
+							</q-input>
+						</div>
 					</div>
-				</template>
-				<el-row :gutter="10" v-for="(label, field) in companyInfoFields" :key="field">
-					<el-col :span="24">
-						<el-form-item :label="label">
-							<el-col :span="24">
-								<el-input v-model="formData[field]" readonly @click="copy(field)" style="cursor: pointer">
-									<template #append>
-										<el-button :icon="Pointer" @click="generator(field)"></el-button>
-									</template>
-								</el-input>
-							</el-col>
-						</el-form-item>
-					</el-col>
-				</el-row>
-			</el-card>
-		</el-col>
-		<el-col :span="8">
-			<el-card style="height: 500px">
-				<template #header>
-					<div class="card-header">
-						<span>账号信息</span>
+				</q-card-section>
+			</q-card>
+			<q-card flat bordered>
+				<q-card-section class="card-header q-pa-sm">
+					<div class="text-weight-bold text-body2">企业信息</div>
+				</q-card-section>
+				<q-card-section class="q-pa-sm">
+					<div class="row q-col-gutter-sm">
+						<div class="col-12">
+							<q-input
+								v-model="generatorStore.companyInfo.company"
+								dense
+								borderless
+								class="input-field"
+								label="公司名称"
+								readonly
+								@click="copyToClipboard(generatorStore.companyInfo.company)"
+							>
+								<template v-slot:append>
+									<q-btn flat round dense icon="touch_app" size="sm" @click.stop="generate('company')" />
+								</template>
+							</q-input>
+						</div>
 					</div>
-				</template>
-				<el-row :gutter="10" v-for="(label, field) in accountInfoFields" :key="field">
-					<el-col :span="24">
-						<el-form-item :label="label">
-							<el-col :span="24">
-								<el-input v-model="formData[field]" readonly @click="copy(field)" style="cursor: pointer">
-									<template #append>
-										<el-button :icon="Pointer" @click="generator(field)"></el-button>
-									</template>
-								</el-input>
-							</el-col>
-						</el-form-item>
-					</el-col>
-				</el-row>
-			</el-card>
-		</el-col>
-	</el-row>
-	<!-- 按钮 -->
-	<el-row :gutter="15" style="padding-top: 10px">
-		<el-col :span="24">
-			<el-form-item>
-				<div class="mb-4">
-					<el-button type="primary" :icon="Pointer" @click="generator('all')"> 生成 </el-button>
-					<el-button type="info" :icon="Refresh" @click="resetForm">重置</el-button>
-					<el-button plain type="primary" :icon="User" @click="generateIdCardImage">身份证</el-button>
-					<el-button plain type="primary" :icon="Postcard" @click="generateBusinessImage">营业执照</el-button>
-				</div>
-			</el-form-item>
-		</el-col>
-	</el-row>
+					<div class="row q-col-gutter-sm">
+						<div class="col-12">
+							<q-input
+								v-model="generatorStore.basicInfo.name"
+								dense
+								borderless
+								class="input-field"
+								label="法定代表人"
+								readonly
+								@click="copyToClipboard(generatorStore.basicInfo.name)"
+							>
+								<template v-slot:append>
+									<q-btn flat round dense icon="touch_app" size="sm" @click.stop="generate('name')" />
+								</template>
+							</q-input>
+						</div>
+					</div>
+					<div class="row q-col-gutter-sm" v-for="(label, field) in generatorStore.companyInfoFields" :key="field">
+						<div class="col-12">
+							<q-input
+								v-model="generatorStore.companyInfo[field]"
+								dense
+								borderless
+								class="input-field"
+								:label="label"
+								readonly
+								@click="copyToClipboard(generatorStore.companyInfo[field])"
+							>
+								<template v-slot:append>
+									<q-btn flat round dense icon="touch_app" size="sm" @click.stop="generate(field)" />
+								</template>
+							</q-input>
+						</div>
+					</div>
+				</q-card-section>
+			</q-card>
+			<q-card flat bordered>
+				<q-card-section class="card-header q-pa-sm">
+					<div class="text-weight-bold text-body2">账号信息</div>
+				</q-card-section>
+				<q-card-section class="q-pa-sm">
+					<div class="row q-col-gutter-sm" v-for="(label, field) in generatorStore.accountInfoFields" :key="field">
+						<div class="col-12">
+							<q-input
+								v-model="generatorStore.accountInfo[field]"
+								dense
+								borderless
+								class="input-field"
+								:label="label"
+								readonly
+								@click="copyToClipboard(generatorStore.accountInfo[field])"
+							>
+								<template v-slot:append>
+									<q-btn flat round dense icon="touch_app" size="sm" @click.stop="generate(field)" />
+								</template>
+							</q-input>
+						</div>
+					</div>
+				</q-card-section>
+			</q-card>
+		</div>
+		<!-- 按钮 -->
+		<div class="q-pt-sm">
+			<div class="mb-4">
+				<q-btn color="primary" icon="touch_app" label="生成" @click="generateAll" size="sm" />
+				<q-btn color="grey-7" icon="refresh" label="重置" @click="resetAll" size="sm" class="q-ml-sm" />
+				<q-btn outline color="primary" icon="person" label="身份证" @click="generateIdCardImage" size="sm" class="q-ml-sm" />
+				<q-btn outline color="primary" icon="badge" label="营业执照" @click="generateBusinessImage" size="sm" class="q-ml-sm" />
+			</div>
+		</div>
+	</div>
 </template>
 
 <script setup>
-	import { ref, onMounted } from 'vue';
-	import { ElMessage } from 'element-plus';
-	import { CopyDocument, User, Pointer, Postcard, Refresh } from '@element-plus/icons-vue';
-	import { copyToClipboard } from '@/utils';
-	import moment from 'moment';
+import { onMounted } from 'vue';
+import { useQuasar } from 'quasar';
+import { useAppStore, useGeneratorStore } from '@/stores';
+import { imageApi } from '@/api';
+import { copyToClipboard } from '@/utils';
 
-	const props = defineProps({
-		checkNbBalance: Function,
-		windowConfig: Object,
-		setFormLoading: Function,
-		consumeNb: Function,
-	});
+const $q = useQuasar();
+const appStore = useAppStore();
+const generatorStore = useGeneratorStore();
 
-	const formData = ref({
-		gender: 0,
-		birthday: '1992-07-25',
-		name: '',
-		phone: '',
-		email: '',
-		idCard: '',
-		company: '',
-		socialCreditCode: '',
-		organizationCode: '',
-		zhongzhengCode: '',
-		BOC: '',
-		CCB: '',
-		ABC: '',
-		ICBC: '',
-		PSBC: '',
-	});
+const genderOptions = [
+	{ label: '男', value: 1 },
+	{ label: '女', value: 0 }
+];
 
-	const personalInfoFields = {
-		name: '姓名',
-		idCard: '身份证号',
-		phone: '手机号',
-		email: '邮箱',
-	};
+async function generate(field) {
+	if (appStore.checkNbBalance(false)) return;
 
-	const companyInfoFields = {
-		company: '公司名称',
-		name: '法定代表人',
-		socialCreditCode: '统一社会信用代码',
-		organizationCode: '组织机构代码',
-		zhongzhengCode: '中征码',
-	};
-
-	const accountInfoFields = {
-		BOC: '中国银行账号',
-		CCB: '建设银行账号',
-		ABC: '农业银行账号',
-		ICBC: '工商银行账号',
-		PSBC: '邮储银行账号',
-	};
-
-	onMounted(() => {
-		formData.value.gender = Math.random() > 0.5 ? 1 : 0;
-		if (window.pywebview) {
-			generator('all', true);
-		} else {
-			window.addEventListener('pywebviewready', () => {
-				generator('all', true);
-			});
+	appStore.setLoading(true);
+	try {
+		let value;
+		if (field in generatorStore.basicApiMap) {
+			value = await generatorStore.basicApiMap[field]();
+			generatorStore.updateBasicField(field, value);
+		} else if (field in generatorStore.companyApiMap) {
+			value = await generatorStore.companyApiMap[field]();
+			generatorStore.updateCompanyField(field, value);
+		} else if (field in generatorStore.accountApiMap) {
+			value = await generatorStore.accountApiMap[field]();
+			generatorStore.updateAccountField(field, value);
 		}
-	});
+	} catch (error) {
+		console.error(`generate ${field}:`, error);
+	} finally {
+		setTimeout(() => {
+			appStore.setLoading(false);
+		}, 100);
+	}
+}
 
-	function generator(type, isInit = false) {
-		if (props.checkNbBalance(isInit)) {
-			return;
+async function generateAll(isInit = false) {
+	const isInitFlag = isInit === true;
+
+	if (appStore.checkNbBalance(isInitFlag)) return;
+
+	appStore.setLoading(true);
+
+	try {
+		const promises = [];
+
+		for (const field of Object.keys(generatorStore.basicApiMap)) {
+			promises.push(
+				generatorStore.basicApiMap[field]().then(value => {
+					generatorStore.updateBasicField(field, value);
+				})
+			);
 		}
 
-		props.setFormLoading(true);
-
-		try {
-			if (type === 'name') {
-				window.pywebview.api.randomName(formData.value.gender).then(name => {
-					formData.value.name = name;
-				});
-			} else if (type === 'idCard') {
-				window.pywebview.api.randomIdCard(formData.value.gender, formData.value.birthday).then(idCard => {
-					formData.value.idCard = idCard;
-				});
-			} else if (type === 'phone') {
-				window.pywebview.api.randomPhoneNumber().then(phone => {
-					formData.value.phone = phone;
-				});
-			} else if (type === 'email') {
-				window.pywebview.api.randomEmail().then(email => {
-					formData.value.email = email;
-				});
-			} else if (type === 'company') {
-				window.pywebview.api.randomCompanyName().then(company => {
-					formData.value.company = company;
-				});
-			} else if (type === 'socialCreditCode') {
-				window.pywebview.api.randomSocialCreditCode().then(socialCreditCode => {
-					formData.value.socialCreditCode = socialCreditCode;
-				});
-			} else if (type === 'organizationCode') {
-				window.pywebview.api.randomOrganizationCode().then(organizationCode => {
-					formData.value.organizationCode = organizationCode;
-				});
-			} else if (type === 'zhongzhengCode') {
-				window.pywebview.api.randomZhongzhengCode().then(zhongzhengCode => {
-					formData.value.zhongzhengCode = zhongzhengCode;
-				});
-			} else if (type === 'BOC') {
-				window.pywebview.api.randomBankAccount(type).then(bankAccount => {
-					formData.value.BOC = bankAccount;
-				});
-			} else if (type === 'CCB') {
-				window.pywebview.api.randomBankAccount(type).then(bankAccount => {
-					formData.value.CCB = bankAccount;
-				});
-			} else if (type === 'ABC') {
-				window.pywebview.api.randomBankAccount(type).then(bankAccount => {
-					formData.value.ABC = bankAccount;
-				});
-			} else if (type === 'ICBC') {
-				window.pywebview.api.randomBankAccount(type).then(bankAccount => {
-					formData.value.ICBC = bankAccount;
-				});
-			} else if (type === 'PSBC') {
-				window.pywebview.api.randomBankAccount(type).then(bankAccount => {
-					formData.value.PSBC = bankAccount;
-				});
-			} else if (type === 'all') {
-				Object.keys(personalInfoFields).forEach(field => {
-					generator(field);
-				});
-				Object.keys(companyInfoFields).forEach(field => {
-					generator(field);
-				});
-				Object.keys(accountInfoFields).forEach(field => {
-					generator(field);
-				});
-
-				//随机生日
-				formData.value.birthday = moment()
-					.year(Math.floor(Math.random() * (2000 - 1960 + 1)) + 1960)
-					.dayOfYear(Math.floor(Math.random() * 365) + 1)
-					.format('YYYY-MM-DD');
-			}
-		} catch (error) {
-			console.error('generator');
-			return;
+		for (const field of Object.keys(generatorStore.companyApiMap)) {
+			promises.push(
+				generatorStore.companyApiMap[field]().then(value => {
+					generatorStore.updateCompanyField(field, value);
+				})
+			);
 		}
 
-		setTimeout(async () => {
-			props.setFormLoading(false);
-			if (!isInit && type === 'all') {
-				props.consumeNb(1);
-			}
+		for (const field of Object.keys(generatorStore.accountApiMap)) {
+			promises.push(
+				generatorStore.accountApiMap[field]().then(value => {
+					generatorStore.updateAccountField(field, value);
+				})
+			);
+		}
+
+		await Promise.all(promises);
+
+		generatorStore.randomizeBirthday();
+
+		if (!isInitFlag) {
+			appStore.consumeNb(1);
+		}
+	} catch (error) {
+		console.error('generateAll:', error);
+	} finally {
+		setTimeout(() => {
+			appStore.setLoading(false);
 		}, 500);
 	}
+}
 
-	function copy(field) {
-		const text = formData.value[field];
-		copyToClipboard(text);
+function resetAll() {
+	generatorStore.resetBasicInfo();
+	generatorStore.resetCompanyInfo();
+	generatorStore.resetAccountInfo();
+}
+
+async function generateIdCardImage() {
+	if (appStore.checkNbBalance(false, 1)) return;
+
+	appStore.setLoading(true);
+
+	try {
+		const result = await imageApi.generateIdCardImage(
+			generatorStore.basicInfo.name,
+			generatorStore.basicInfo.gender,
+			generatorStore.basicInfo.birthday,
+			generatorStore.basicInfo.idCard,
+			appStore.directoryPath
+		);
+		$q.notify({ message: result, color: 'positive', position: 'top' });
+		appStore.consumeNb(2);
+	} catch (error) {
+		$q.notify({ message: error, color: 'negative', position: 'top' });
+	} finally {
+		appStore.setLoading(false);
 	}
+}
 
-	function resetForm() {
-		formData.value = {
-			gender: Math.random() > 0.5 ? 1 : 0,
-			birthday: '1992-07-25',
-			name: '',
-			phone: '',
-			email: '',
-			idCard: '',
-			company: '',
-			socialCreditCode: '',
-			organizationCode: '',
-			zhongzhengCode: '',
-			BOC: '',
-			CCB: '',
-			ABC: '',
-			ICBC: '',
-			PSBC: '',
-		};
+async function generateBusinessImage() {
+	if (appStore.checkNbBalance(false, 1)) return;
+
+	appStore.setLoading(true);
+
+	try {
+		const result = await imageApi.generateBusinessImage(
+			generatorStore.companyInfo.company,
+			generatorStore.companyInfo.socialCreditCode,
+			generatorStore.basicInfo.name,
+			appStore.directoryPath
+		);
+		$q.notify({ message: result, color: 'positive', position: 'top' });
+		appStore.consumeNb(2);
+	} catch (error) {
+		$q.notify({ message: error, color: 'negative', position: 'top' });
+	} finally {
+		appStore.setLoading(false);
 	}
+}
 
-	function generateIdCardImage() {
-		if (props.checkNbBalance(false, 1)) {
-			return;
-		}
-
-		props.setFormLoading(true);
-		setTimeout(() => {
-			try {
-				window.pywebview.api
-					.generateIdCardImage(formData.value.name, formData.value.gender, formData.value.birthday, formData.value.idCard, props.windowConfig.directoryPath)
-					.then(idCardImage => {
-						ElMessage({
-							message: idCardImage,
-							type: 'success',
-						});
-					})
-					.catch(error => {
-						ElMessage({
-							message: error,
-							type: 'error',
-						});
-					});
-
-				props.consumeNb(2);
-			} catch (error) {
-				console.error('generateIdCardImage');
-			}
-
-			props.setFormLoading(false);
-		}, 1000);
+onMounted(() => {
+	if (window.pywebview) {
+		generateAll(true);
+	} else {
+		window.addEventListener('pywebviewready', () => {
+			generateAll(true);
+		});
 	}
-
-	function generateBusinessImage() {
-		if (props.checkNbBalance(false, 1)) {
-			return;
-		}
-
-		props.setFormLoading(true);
-		setTimeout(() => {
-			try {
-				window.pywebview.api
-					.generateBusinessImage(formData.value.company, formData.value.socialCreditCode, formData.value.name, props.windowConfig.directoryPath)
-					.then(businessImage => {
-						ElMessage({
-							message: businessImage,
-							type: 'success',
-						});
-					})
-					.catch(error => {
-						ElMessage({
-							message: error,
-							type: 'error',
-						});
-					});
-				props.consumeNb(2);
-			} catch (error) {
-				console.error('generateBusinessImage');
-			}
-
-			props.setFormLoading(false);
-		}, 1000);
-	}
+});
 </script>
 
 <style lang="css" scoped>
-	.card-header {
-		font-weight: bold;
-	}
+.generator-container {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+}
 
-	:deep(label) {
-		font-weight: 500;
-	}
+.card-header {
+	border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
 
-	.el-button {
-		transition: all 0.5s ease;
-	}
+.body--dark .card-header {
+	border-bottom-color: rgba(255, 255, 255, 0.12);
+}
+
+.mb-4 {
+	display: flex;
+	gap: 8px;
+	flex-shrink: 0;
+}
+
+/* CSS Grid 等高卡片布局 - 填满剩余高度 */
+.card-grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 8px;
+	align-items: stretch;
+	flex: 1;
+	min-height: 0;
+}
+
+.card-grid > .q-card {
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+}
+
+.card-grid > .q-card > .q-card__section:last-child {
+	flex: 1;
+	overflow-y: auto;
+	min-height: 0;
+}
+
+/* 隐藏卡片内滚动条 */
+.card-grid > .q-card > .q-card__section:last-child::-webkit-scrollbar {
+	display: none;
+}
+
+/* 增加字段行间距 */
+.card-grid :deep(.row.q-col-gutter-sm) {
+	margin-bottom: 8px;
+}
+
+.card-grid :deep(.row.q-col-gutter-sm:last-child) {
+	margin-bottom: 0;
+}
+
+/* 输入框样式 - 简洁底部边框 */
+.input-field {
+	cursor: pointer;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+	border-radius: 0;
+}
+
+.input-field:hover {
+	border-bottom-color: rgba(0, 0, 0, 0.24);
+}
+
+.body--dark .input-field {
+	border-bottom-color: rgba(255, 255, 255, 0.12);
+}
+
+.body--dark .input-field:hover {
+	border-bottom-color: rgba(255, 255, 255, 0.24);
+}
+
+/* 输入框聚焦时的高亮 */
+.input-field.q-field--focused {
+	border-bottom-color: var(--q-primary);
+}
+
+.input-field :deep(.q-field__control) {
+	background: transparent !important;
+	padding: 0 4px;
+	height: 32px;
+}
+
+.input-field :deep(.q-field__label) {
+	font-size: 13px;
+	top: 7px;
+}
+
+/* 浮动后的标签样式 - 保持可读大小 */
+.input-field.q-field--float :deep(.q-field__label) {
+	font-size: 12px;
+	transform: translateY(-60%) scale(1);
+	max-width: 100%;
+}
+
+.input-field :deep(.q-field__native) {
+	padding-top: 14px;
+	font-size: 13px;
+}
 </style>

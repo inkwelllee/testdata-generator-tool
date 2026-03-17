@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
+import { quasar, transformAssetUrls } from '@quasar/vite-plugin';
 import path from 'path';
 import copyToUiPlugin from './vite-plugin-copy-to-ui.js';
 
@@ -8,7 +9,12 @@ export default defineConfig({
 	publicPath: './',
 	base: './',
 	plugins: [
-		vue(),
+		vue({
+			template: { transformAssetUrls }
+		}),
+		quasar({
+			sassVariables: path.resolve(__dirname, './src/quasar-variables.scss')
+		}),
 		copyToUiPlugin() // 自动复制到ui目录
 	],
 	resolve: {

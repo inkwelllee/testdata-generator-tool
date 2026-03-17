@@ -9,7 +9,7 @@ export default function copyToUiPlugin() {
         name: 'copy-to-ui',
         closeBundle() {
             const sourceDir = path.resolve('dist');
-            const targetDir = path.resolve('../asserts/ui');
+            const targetDir = path.resolve('../assets/ui');
             
             console.log('\n🚀 开始复制构建文件到ui目录...');
             

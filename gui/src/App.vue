@@ -1,32 +1,42 @@
 <template>
-	<el-watermark :font="font" :content="watermark" :gap="[200, 200]">
-		<RouterView />
-	</el-watermark>
+	<RouterView />
 </template>
 
 <script setup>
-	import { ref } from 'vue';
-	import { RouterView } from 'vue-router';
-
-	const font = ref({
-		color: 'rgba(0, 0, 0, .15)',
-	});
-
-	const watermarkList = [
-		'我不是水印，而是你眼里的一道痕',
-		'你好，我是Inkwell',
-		// '我不是繁星，而是你心底的一抹幽光',
-		// '我不是尘埃，而是你记忆中的一粒微尘',
-		// '我不是幻影，而是你心中的一缕残像',
-		// '我不是雨滴，而是你眸中的一滴泪光',
-		// '我不是风声，而是你耳畔的一丝轻语',
-		// '我不是云朵，而是你视线中的一抹缥缈',
-		// '我不是灯火，而是你旅程中的一点微光',
-		// '我不是花瓣，而是你情感中的一缕芬芳',
-		// '我不是涟漪，而是你思绪中的一波微澜',
-		// '我不是梦境，而是你灵魂中的一抹虚幻'
-	];
-	const watermark = ref(watermarkList[Math.floor(Math.random() * watermarkList.length)]);
+import { RouterView } from 'vue-router';
 </script>
 
-<style scoped></style>
+<style>
+/* 禁用 pywebview 滚动条 */
+html, body {
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	height: 100%;
+	width: 100%;
+}
+
+#app {
+	height: 100%;
+	width: 100%;
+	overflow: hidden;
+}
+
+/* 通知弹窗样式 */
+.notify-toast {
+	background: rgba(0, 0, 0, 0.75) !important;
+	color: white !important;
+	border-radius: 6px !important;
+	padding: 8px 16px !important;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+.notify-toast .q-icon {
+	font-size: 18px;
+	margin-right: 8px;
+}
+
+.notify-toast .q-notification__message {
+	font-size: 13px;
+}
+</style>

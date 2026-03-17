@@ -63,8 +63,8 @@ def main():
     logging.info("程序开始执行 => width")
     
     # 窗口大小
-    initWidth = 1200
-    initHeight = 660
+    initWidth = 750
+    initHeight = 385
     logging.info("程序开始执行 => initHeight")
     
     # 设置MIME类型
@@ -72,20 +72,20 @@ def main():
     logging.info("程序开始执行 => mimetypes")
     
     # 创建窗口
-    #window = webview.create_window(title='BlingBling', url='http://localhost:8098', width=initWidth, height=initHeight, js_api=api, resizable=True, text_select=False, confirm_close=False, frameless=True, easy_drag=False)
+    window = webview.create_window(title='BlingBling', url='http://localhost:8098', width=initWidth, height=initHeight, js_api=api, resizable=True, text_select=False, confirm_close=False, frameless=True, easy_drag=False)
     #window = webview.create_window(title='BlingBling', url='http://inkwell.top/gen_ui', width=initWidth, height=initHeight, js_api=api, resizable=True, text_select=False, confirm_close=False, frameless=True, easy_drag=False)
-    window = webview.create_window(
-        'BlingBling',
-        'assets/ui/index.html', 
-        width=initWidth, 
-        height=initHeight, 
-        js_api=api, 
-        resizable=True, 
-        text_select=False, 
-        confirm_close=False, 
-        frameless=True, 
-        easy_drag=False
-    )
+    # window = webview.create_window(
+    #     'BlingBling',
+    #     'assets/ui/index.html', 
+    #     width=initWidth, 
+    #     height=initHeight, 
+    #     js_api=api, 
+    #     resizable=True, 
+    #     text_select=False, 
+    #     confirm_close=False, 
+    #     frameless=True, 
+    #     easy_drag=False
+    # )
     logging.info("程序开始执行 => window")
     
     api.set_window(window)

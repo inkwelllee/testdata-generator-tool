@@ -1,517 +1,516 @@
 <template>
-	<el-scrollbar>
-		<el-header class="app-header">
-			<el-row>
-				<el-col :span="12">
-					<img src="@/assets/icons/jiaoayi.ico" @click="windowConfig.winSetUp = true" style="width: 30px; height: 30px; -webkit-user-drag: none" />
-					<span class="app-title">测试数据生成器</span>
-				</el-col>
-				<el-col :span="12">
-					<!-- 余额进度条 -->
-					<div style="text-align: right">
-						<el-progress class="demo-progress" type="dashboard" :percentage="residuePercent" :color="customColors" :width="32" :stroke-width="4">
-							<template #default="{ percentage }">
-								<span class="percentage-value">{{ percentage }}%</span>
-							</template>
-						</el-progress>
-						<!-- 切换主题 -->
-						<el-switch
-							style="margin-right: 12px; --el-switch-on-color: #2c2c2c; --el-switch-off-color: #f2f2f2"
-							v-model="isDark"
-							inline-prompt
-							:active-action-icon="Moon"
-							:inactive-action-icon="Sun"
-							@change="toggleDark"
-						>
-						</el-switch>
-						<!-- 窗口按钮 -->
-						<el-button type="info" :icon="Minus" @click="minimizeApp" plain></el-button>
-						<el-button type="warning" :icon="windowConfig.restoreWindow ? CopyDocument : FullScreen" @click="restoreApp" plain></el-button>
-						<el-button type="danger" :icon="Close" @click="exitAppTip = true" plain></el-button>
+	<div class="app-container" ref="containerRef">
+		<!-- 窗口边缘缩放区域 -->
+		<div class="resize-edge resize-bottom" @mousedown="startResize('bottom', $event)"></div>
+		<div class="resize-edge resize-left" @mousedown="startResize('left', $event)"></div>
+		<div class="resize-edge resize-right" @mousedown="startResize('right', $event)"></div>
+		<div class="resize-corner resize-tl" @mousedown="startResize('top-left', $event)"></div>
+		<div class="resize-corner resize-tr" @mousedown="startResize('top-right', $event)"></div>
+		<div class="resize-corner resize-bl" @mousedown="startResize('bottom-left', $event)"></div>
+		<div class="resize-corner resize-br" @mousedown="startResize('bottom-right', $event)"></div>
+
+		<!-- 固定顶部 -->
+		<div class="app-header">
+			<div class="header-left">
+				<img src="@/assets/icons/jiaoayi.ico" @click.stop="appStore.winSetUp = true" style="width: 24px; height: 24px; -webkit-user-drag: none" />
+				<span class="app-title">测试数据生成器</span>
+			</div>
+			<div class="header-right">
+				<q-circular-progress
+					class="demo-progress"
+					:value="appStore.residuePercent"
+					size="28px"
+					:thickness="0.2"
+					:color="progressColor"
+					track-color="grey-4"
+					show-value
+				>
+					<span class="percentage-value">{{ appStore.residuePercent }}%</span>
+				</q-circular-progress>
+				<q-toggle
+					v-model="isDark"
+					@update:model-value="toggleDark"
+					checked-icon="dark_mode"
+					unchecked-icon="light_mode"
+					size="sm"
+					class="q-mr-sm"
+				/>
+				<q-btn flat round dense icon="remove" color="grey-7" @click="minimize" size="sm" />
+				<q-btn flat round dense :icon="appStore.restoreWindow ? 'filter_none' : 'fullscreen'" color="warning" @click="toggleMaximize" size="sm" />
+				<q-btn flat round dense icon="close" color="negative" @click="exitAppTip = true" size="sm" />
+			</div>
+		</div>
+
+		<!-- 可滚动内容区 -->
+		<div class="app-body">
+			<q-form class="app-form" ref="formRef">
+				<q-tabs v-model="activeTab" dense class="tab-header" active-color="primary" indicator-color="primary" align="justify">
+					<q-tab name="basic" label="基础信息" />
+					<q-tab name="vehicle" label="车辆信息" />
+				</q-tabs>
+
+				<q-tab-panels v-model="activeTab" animated class="tab-panels">
+					<q-tab-panel name="basic" class="q-pa-sm">
+						<BasicInfoGenerator />
+					</q-tab-panel>
+					<q-tab-panel name="vehicle" class="q-pa-sm">
+						<VehicleInfoGenerator />
+					</q-tab-panel>
+				</q-tab-panels>
+			</q-form>
+
+			<!-- 加载状态 -->
+			<q-inner-loading :showing="appStore.loading">
+				<q-spinner-gears size="50px" color="primary" />
+			</q-inner-loading>
+		</div>
+
+		<!-- 投币对话框 -->
+		<q-dialog v-model="appStore.showNbDialog" persistent>
+			<q-card class="coin-dialog">
+				<q-card-section class="q-pa-sm">
+					<div class="text-subtitle1 text-weight-medium text-center">这是另外的价钱</div>
+				</q-card-section>
+
+				<q-card-section class="q-pa-sm text-center">
+					<div class="text-body2 text-grey q-mb-sm">牛币不足，请投币</div>
+					<div class="q-mb-sm">
+						<q-btn outline color="grey-6" label="我就不投" :disable="appStore.dialogBtnDisabled" @click="appStore.zaishuoyibian = true" size="sm" />
 					</div>
-				</el-col>
-			</el-row>
-		</el-header>
-		<el-form class="app-from" ref="formRef" v-loading="formLoading" :model="formData" label-width="120px" label-position="top">
-			<el-tabs type="border-card">
-				<el-tab-pane label="基础信息">
-					<BasicInfoGenerator
-						:checkNbBalance="checkNbBalance"
-						:windowConfig="windowConfig"
-						:setFormLoading="setFormLoading"
-						:consumeNb="consumeNb"
-					/>
-				</el-tab-pane>
-				<el-tab-pane label="车辆信息">
-					<VehicleInfoGenerator
-						:checkNbBalance="checkNbBalance"
-						:setFormLoading="setFormLoading"
-						:consumeNb="consumeNb"
-					/>
-				</el-tab-pane>
-			</el-tabs>
-			<!-- 投币 -->
-			<el-dialog v-model="dialogVisible" title="这是另外的价钱" width="500" :close-on-click-modal="false" :show-close="false">
-				<div class="block text-center" style="height: 280px">
-					<span class="demonstration">牛币不足，请投币</span>
-					<el-button class="butou-btn" type="danger" @click="windowConfig.zaishuoyibian = true" :disabled="dialogBtnDisabled" text> 我就不投 </el-button>
 
-					<el-dialog v-model="windowConfig.zaishuoyibian" width="500" title="" append-to-body>
-						<img src="@/assets/img/zaishuoyibian.jpg" alt="直视我" />
-					</el-dialog>
-
-					<el-carousel height="auto" :autoplay="false">
-						<el-carousel-item style="height: 260px">
-							<el-button class="countdown-btn" type="primary" @click="putCoins" :disabled="dialogBtnDisabled" text> 投币 </el-button>
+					<q-carousel v-model="carouselSlide" animated height="200px" class="bg-transparent">
+						<q-carousel-slide name="video" class="q-pa-none">
+							<q-btn unelevated color="primary" label="投币" :disable="appStore.dialogBtnDisabled" @click="putCoins" class="coin-btn" />
 							<video autoplay loop muted playsinline id="bgvid" style="width: 100%">
 								<source src="@/assets/video/WeChat_20241219111716.mp4" type="video/webm" />
 							</video>
-						</el-carousel-item>
-						<el-carousel-item style="height: 260px; background-color: #fff">
-							<el-button class="countdown-btn" type="primary" @click="putCoins" :disabled="dialogBtnDisabled" text> 投币 </el-button>
-							<div v-if="windowConfig.getQRStatus" id="imgid" style="text-align: center; background-color: #000"></div>
-							<div v-if="!windowConfig.getQRStatus" style="text-align: center; background-color: #000"><img src="@/assets/img/inkwell_web.png" alt="二维码" /></div>
-						</el-carousel-item>
-					</el-carousel>
-				</div>
-			</el-dialog>
-			<!-- 退出提示 -->
-			<el-dialog v-model="exitAppTip" title="提示" :align-center="true" :width="500" draggable>
-				<h2 style="text-align: center">{{ windowConfig.exitTipText }}</h2>
-				<template #footer>
-					<div class="dialog-footer">
-						<el-button plain type="primary" @click="destroyApp"> 确定 </el-button>
-					</div>
-				</template>
-			</el-dialog>
+						</q-carousel-slide>
+						<q-carousel-slide name="qrcode" class="q-pa-none bg-black">
+							<q-btn unelevated color="primary" label="投币" :disable="appStore.dialogBtnDisabled" @click="putCoins" class="coin-btn" />
+							<div v-if="appStore.getQRStatus" id="imgid" style="text-align: center;"></div>
+							<div v-if="!appStore.getQRStatus" style="text-align: center;">
+								<img src="@/assets/img/inkwell_web.png" alt="二维码" style="max-height: 180px;" />
+							</div>
+						</q-carousel-slide>
+					</q-carousel>
+				</q-card-section>
 
-			<!-- 节日信息 -->
-			<el-dialog v-model="windowConfig.festivalInfo" title="节日快乐" :align-center="true" :width="1150" :height="550" draggable>
-				<FestivalAnimation v-if="windowConfig.festivalInfo" />
-			</el-dialog>
-			<!-- 设置按钮 -->
-			<SettingsDrawer
-				v-model:visible="windowConfig.winSetUp"
-				:config="windowConfig"
-				:resizeApp="resizeApp"
-				:saveWinSizeItem="saveWinSizeItem"
-				:changeDirectory="changeDirectory"
-				:changePath="changePath"
-				:checkPath="checkPath"
-				:beforeClose="winSetUpBeforeClose"
-			/>
-		</el-form>
-	</el-scrollbar>
+				<!-- 再说一遍对话框 -->
+				<q-dialog v-model="appStore.zaishuoyibian">
+					<q-card>
+						<q-card-section class="q-pa-none">
+							<img src="@/assets/img/zaishuoyibian.jpg" alt="直视我" style="max-width: 300px;" />
+						</q-card-section>
+					</q-card>
+				</q-dialog>
+			</q-card>
+		</q-dialog>
+
+		<!-- 退出提示 -->
+		<q-dialog v-model="exitAppTip">
+			<q-card class="exit-dialog">
+				<q-card-section class="q-pa-md text-center">
+					<div class="text-body1">{{ appStore.exitTipText }}</div>
+				</q-card-section>
+				<q-card-actions align="right" class="q-px-md q-pb-sm">
+					<q-btn flat color="primary" label="确定" size="sm" @click="destroy" />
+				</q-card-actions>
+			</q-card>
+		</q-dialog>
+
+		<!-- 节日信息 -->
+		<q-dialog v-model="appStore.festivalInfo">
+			<q-card style="width: 1150px; max-width: 90vw;">
+				<q-card-section class="text-h6">节日快乐</q-card-section>
+				<q-card-section>
+					<FestivalAnimation v-if="appStore.festivalInfo" />
+				</q-card-section>
+			</q-card>
+		</q-dialog>
+
+		<!-- 设置抽屉 -->
+		<SettingsDrawer
+			v-model:visible="appStore.winSetUp"
+			:config="appStore.windowConfig"
+			:changeDirectory="appStore.changeDirectory"
+			:changePath="appStore.updateDirectoryPath"
+			:checkPath="handleCheckPath"
+			:beforeClose="winSetUpBeforeClose"
+		/>
+	</div>
 </template>
 
 <script setup>
-	import { ref, onMounted } from 'vue';
-	import { ElMessage } from 'element-plus';
-	import { CopyDocument, User, Pointer, Postcard, Refresh, Close, Minus, FullScreen } from '@element-plus/icons-vue';
-	import { copyToClipboard } from '@/utils';
-	import moment from 'moment';
-	import axios from 'axios';
-	import { useDark, useToggle } from '@vueuse/core';
-	import Sun from '@/assets/icons/sun.vue';
-	import Moon from '@/assets/icons/moon.vue';
-	import FestivalAnimation from '@/components/FestivalAnimation.vue';
-	import SettingsDrawer from '@/components/SettingsDrawer.vue';
-	import BasicInfoGenerator from '@/components/BasicInfoGenerator.vue';
-	import VehicleInfoGenerator from '@/components/VehicleInfoGenerator.vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { useQuasar, Dark } from 'quasar';
+import { useAppStore } from '@/stores';
+import { useWindow } from '@/composables/useWindow';
+import { windowApi } from '@/api';
+import FestivalAnimation from '@/components/FestivalAnimation.vue';
+import SettingsDrawer from '@/components/SettingsDrawer.vue';
+import BasicInfoGenerator from '@/components/BasicInfoGenerator.vue';
+import VehicleInfoGenerator from '@/components/VehicleInfoGenerator.vue';
 
-	// 深色模式
-	const isDark = useDark();
-	const toggleDark = useToggle(isDark);
+const $q = useQuasar();
+const appStore = useAppStore();
+const { minimize, toggleMaximize, destroy } = useWindow();
 
-	const formLoading = ref(false);
-	const dialogVisible = ref();
-	const exitAppTip = ref(false);
-	const dialogBtnDisabled = ref(true);
-	const residuePercent = ref(100);
-	const windowConfig = ref({
-		//窗口配置
-		winSetUp: false, //窗口设置是否展示
-		restoreWindow: false, //窗口放大或恢复
-		screenWidth: (localStorage.getItem('screenWidth') || 1200) * 1, //窗口宽度
-		screenHeight: (localStorage.getItem('screenHeight') || 700) * 1, //窗口高度
-		maxScreenWidth: window.screen.width * window.devicePixelRatio || 1920, //最大窗口宽度(屏幕宽度 * 缩放比例)
-		maxscreenHeight: window.screen.height * window.devicePixelRatio || 1080, //最大窗口高度
-		exitTipText: '暂别勿思念，转瞬与亲见', //退出提示语
-		tangDaren: '', //汤达人
-		getQRStatus: false, //二维码获取成功状态
-		zaishuoyibian: false, //不投币展示框
-		festivalInfo: false, //节日信息
-		directoryType: localStorage.getItem('directoryType') || 'desktop', //目录设置 desktop,桌面,follow,跟随应用,diy,自定义
-		enablePath: localStorage.getItem('enablePath') || false, //diy目录是否生效
-		directoryPath: localStorage.getItem('directoryPath') || '', //生成目录路径
-	});
+const exitAppTip = ref(false);
+const activeTab = ref('basic');
+const carouselSlide = ref('video');
 
+// 进度条颜色
+const progressColor = computed(() => {
+	const val = appStore.residuePercent;
+	if (val <= 20) return 'negative';
+	if (val <= 40) return 'warning';
+	if (val <= 60) return 'positive';
+	if (val <= 80) return 'info';
+	return 'primary';
+});
 
+// 深色模式
+const isDark = ref(Dark.isActive);
 
-	const customColors = ref([
-		{ color: '#f56c6c', percentage: 20 },
-		{ color: '#e6a23c', percentage: 40 },
-		{ color: '#5cb87a', percentage: 60 },
-		{ color: '#1989fa', percentage: 80 },
-		{ color: '#6f7ad3', percentage: 100 },
-	]);
+function toggleDark() {
+	Dark.toggle();
+	isDark.value = Dark.isActive;
+	localStorage.setItem('darkMode', Dark.isActive);
+}
 
-	const exitTip = [
-		'暂别勿思念，转瞬与亲见',
-		'暂别莫惆怅，不久再相逢',
-		'离别有时，重逢有期',
-		'暂别且安心，相逢终有时',
-		'暂时的离别，是为了更好的相遇',
-		'离别只是短暂，期待再次相遇',
-		'离别之刻，重逢在望',
-		'此刻虽离别，相逢在眼前',
-		'这就走了？',
-		'好吧，再见',
-		'好吧，记得想我',
-	];
+// 初始化深色模式
+const savedDark = localStorage.getItem('darkMode');
+if (savedDark !== null) {
+	Dark.set(savedDark === 'true');
+	isDark.value = Dark.isActive;
+}
 
-	onMounted(() => {
-		//formData.value.gender = Math.random() > 0.5 ? 1 : 0;
-		//getTangDaren();
-		windowConfig.value.exitTipText = exitTip[Math.floor(Math.random() * exitTip.length)];
-		residuePercent.value = (localStorage.getItem('nbBalance') || 100) * 1;
-		setTimeout(() => {
-			resizeApp();
-			saveWinSizeItem(); // 初始化窗口大小
-			changeDirectory(windowConfig.value.directoryType, true); //初始化生成路径
-			//generator('all', true);
-		}, 100);
+// ==================== 窗口缩放 ====================
+const resizeState = ref({
+	isResizing: false,
+	direction: '',
+	startX: 0,
+	startY: 0,
+	startWidth: 0,
+	startHeight: 0,
+});
 
-		showFestivalInfo();
-	});
+const MIN_WIDTH = 750;
+const MIN_HEIGHT = 385;
 
-	function showFestivalInfo() {
-		const today = new Date();
-		const month = today.getMonth() + 1; // 注意月份是从 0 开始的，要加 1
-		const day = today.getDate();
-		console.log('加载节日', today, month, day);
+function startResize(direction, event) {
+	if (!window.pywebview) return;
 
-		// 检查是否为特定节日日期
-		if (month === 1 && day >= 1 && day <= 7) {
-			console.log('######## 欢度元旦 ########');
-			windowConfig.value.festivalInfo = true;
+	event.preventDefault();
+	resizeState.value = {
+		isResizing: true,
+		direction,
+		startX: event.screenX,
+		startY: event.screenY,
+		startWidth: appStore.screenWidth,
+		startHeight: appStore.screenHeight,
+	};
 
-			// 91.5秒后自动关闭
-			setTimeout(() => {
-				windowConfig.value.festivalInfo = false;
-			}, 91500);
-		}
+	document.addEventListener('mousemove', handleResize);
+	document.addEventListener('mouseup', stopResize);
+}
+
+function handleResize(event) {
+	if (!resizeState.value.isResizing) return;
+
+	const { direction, startX, startY, startWidth, startHeight } = resizeState.value;
+	const deltaX = event.screenX - startX;
+	const deltaY = event.screenY - startY;
+
+	let newWidth = startWidth;
+	let newHeight = startHeight;
+
+	if (direction.includes('right')) {
+		newWidth = Math.max(MIN_WIDTH, startWidth + deltaX);
+	}
+	if (direction.includes('left')) {
+		newWidth = Math.max(MIN_WIDTH, startWidth - deltaX);
+	}
+	if (direction.includes('bottom')) {
+		newHeight = Math.max(MIN_HEIGHT, startHeight + deltaY);
+	}
+	if (direction.includes('top')) {
+		newHeight = Math.max(MIN_HEIGHT, startHeight - deltaY);
 	}
 
-	function setFormLoading(val) {
-		formLoading.value = val;
+	newWidth = Math.min(newWidth, appStore.maxScreenWidth);
+	newHeight = Math.min(newHeight, appStore.maxscreenHeight);
+
+	appStore.screenWidth = newWidth;
+	appStore.screenHeight = newHeight;
+	windowApi.resize(newWidth, newHeight);
+}
+
+function stopResize() {
+	if (resizeState.value.isResizing) {
+		resizeState.value.isResizing = false;
+		appStore.saveWindowSize();
 	}
+	document.removeEventListener('mousemove', handleResize);
+	document.removeEventListener('mouseup', stopResize);
+}
 
-	function consumeNb(val) {
-		residuePercent.value = Math.max(residuePercent.value - val, 0);
-		localStorage.setItem('nbBalance', residuePercent.value);
-	}
+onMounted(() => {
+	windowApi.resize(appStore.screenWidth, appStore.screenHeight);
+	appStore.changeDirectory(appStore.directoryType, true);
+	appStore.checkFestival();
+});
 
-	// 检查余额
-	function checkNbBalance(isInit = false, consume = 0) {
-		if (!isInit && residuePercent.value <= consume) {
-			dialogBtnDisabled.value = true;
-			dialogVisible.value = true;
-			getQRCode();
-			setTimeout(() => {
-				dialogBtnDisabled.value = false;
-			}, 3000); //3秒广告倒计时
+onUnmounted(() => {
+	document.removeEventListener('mousemove', handleResize);
+	document.removeEventListener('mouseup', stopResize);
+});
 
-			return true;
-		}
-
-		return false;
-	}
-
-
-
-
-
-	function putCoins() {
-		let nb = Math.floor(Math.random() * 100);
-		if (residuePercent.value + nb >= 100) {
-			nb = 100 - residuePercent.value;
-			ElMessage({
-				message: '哇~，牛币爆表了！！！！',
-				type: 'success',
-			});
-		} else {
-			ElMessage({
-				message: '恭喜你，获得' + nb + '个牛币',
-				type: 'success',
-			});
-		}
-
-		residuePercent.value = residuePercent.value + nb;
-		localStorage.setItem('nbBalance', residuePercent.value);
-		dialogVisible.value = false;
-	}
-
-	function getTangDaren() {
-		try {
-			axios
-				.get('https://api.oick.cn/dutang/api.php')
-				.then(Response => {
-					windowConfig.value.tangDaren = Response.data;
-				})
-				.catch(error => {
-					windowConfig.value.tangDaren = '接口好像罢工了，请稍后再试';
-					console.error('There was an error!', error);
-				});
-		} catch (error) {
-			console.error('getTangDaren');
-		}
-	}
-
-	function getQRCode() {
-		try {
-			const getImageUrl = 'https://oneapi.coderbox.cn/openapi/public/qrcode/simple?lightColor=Black&darkColor=rgb(180,180,180)&text=' + encodeURIComponent('https://inkwell.top/');
-			axios({ url: getImageUrl, method: 'get', responseType: 'blob' })
-				.then(Response => {
-					// 将blob数据转换为可以在浏览器中显示的URL
-					const imageUrl = URL.createObjectURL(new Blob([Response.data]));
-					// 创建一个img标签并设置其src属性为转换后的URL
-					const img = document.createElement('img');
-					img.src = imageUrl;
-					img.height = 260;
-					img.width = 260;
-
-					// 清空容器后再添加新图片，避免重复
-					const container = document.getElementById('imgid');
-					container.innerHTML = '';
-					container.appendChild(img);
-					windowConfig.value.getQRStatus = true;
-				})
-				.catch(error => {
-					windowConfig.value.getQRStatus = false;
-					console.error('There was an error!', error);
-				});
-		} catch (error) {
-			windowConfig.value.getQRStatus = false;
-			console.error('getQRCode');
-		}
-	}
-
-	// 切换目录
-	function changeDirectory(data, isInit = false) {
-		try {
-			localStorage.setItem('directoryType', data);
-			if ('diy' === data) {
-				windowConfig.value.directoryPath = localStorage.getItem('directoryPath') || '';
-				if (windowConfig.value.directoryPath !== '') {
-					checkPath(isInit);
-				}
-				return;
-			}
-			window.pywebview.api.changeDirectory(data).then(directoryPath => {
-				windowConfig.value.enablePath = false;
-				windowConfig.value.directoryPath = directoryPath;
-			});
-		} catch (error) {
-			console.error('changeDirectory');
-		}
-	}
-
-	function changePath() {
-		windowConfig.value.enablePath = false;
-	}
-
-	function checkPath(isInit = false) {
-		let directoryPath = windowConfig.value.directoryPath;
-		if (!directoryPath) {
-			ElMessage({
-				message: '请先输入目录',
-				type: 'warning',
-			});
-			return;
-		}
-		window.pywebview.api.checkPath(directoryPath).then(checkPath => {
-			if (checkPath) {
-				windowConfig.value.enablePath = true;
-				localStorage.setItem('enablePath', true);
-				localStorage.setItem('directoryPath', directoryPath);
-				if (!isInit) {
-					ElMessage({
-						message: '修改目录成功',
-						type: 'success',
-					});
-				}
-			} else {
-				windowConfig.value.enablePath = false;
-				ElMessage({
-					message: '目录不存在，应用目录失败',
-					type: 'error',
-				});
-			}
+function putCoins() {
+	let nb = Math.floor(Math.random() * 100);
+	if (appStore.nbBalance + nb >= 100) {
+		nb = 100 - appStore.nbBalance;
+		$q.notify({
+			message: '哇~，牛币爆表了！！！！',
+			color: 'positive',
+			position: 'top',
+		});
+	} else {
+		$q.notify({
+			message: '恭喜你，获得' + nb + '个牛币',
+			color: 'positive',
+			position: 'top',
 		});
 	}
 
-	function winSetUpBeforeClose(done) {
-		if (windowConfig.value.directoryType === 'diy' && !windowConfig.value.enablePath) {
-			ElMessage({
-				message: '请先检测自定义目录是否可用',
-				type: 'warning',
-			});
-			return;
-		}
-		done();
-	}
+	appStore.addNb(nb);
+	appStore.showNbDialog = false;
+}
 
-	//关闭窗口
-	function destroyApp() {
-		try {
-			window.pywebview.api.destroyApp();
-		} catch (error) {
-			console.error('destroyApp');
-		}
+async function handleCheckPath(isInit = false) {
+	const isValid = await appStore.checkPath(isInit);
+	if (isValid && !isInit) {
+		$q.notify({
+			message: '修改目录成功',
+			color: 'positive',
+			position: 'top',
+		});
+	} else if (!isValid) {
+		$q.notify({
+			message: '目录不存在，应用目录失败',
+			color: 'negative',
+			position: 'top',
+		});
 	}
+}
 
-	//最小化窗口
-	function minimizeApp() {
-		try {
-			window.pywebview.api.minimizeApp();
-		} catch (error) {
-			console.error('minimizeApp');
-		}
+function winSetUpBeforeClose(done) {
+	if (appStore.directoryType === 'diy' && !appStore.enablePath) {
+		$q.notify({
+			message: '请先检测自定义目录是否可用',
+			color: 'warning',
+			position: 'top',
+		});
+		return;
 	}
-	//最大化/还原窗口
-	function restoreApp() {
-		windowConfig.value.restoreWindow = !windowConfig.value.restoreWindow;
-		try {
-			if (windowConfig.value.restoreWindow) {
-				window.pywebview.api.maximizeApp(); //最大化
-			} else {
-				window.pywebview.api.restoreApp(); //还原
-			}
-		} catch (error) {
-			console.error('restoreApp');
-		}
-	}
-
-	// 设置窗口大小
-	function resizeApp(resizeApp) {
-		try {
-			if ('resize' == resizeApp) {
-				windowConfig.value.screenWidth = 1200;
-				windowConfig.value.screenHeight = 700;
-				saveWinSizeItem();
-				window.pywebview.api.resizeApp(1200, 700);
-			} else {
-				window.pywebview.api.resizeApp(windowConfig.value.screenWidth, windowConfig.value.screenHeight);
-			}
-		} catch (error) {
-			console.error('resizeApp');
-		}
-	}
-
-	function saveWinSizeItem() {
-		try {
-			//保存窗口大小
-			localStorage.setItem('screenWidth', windowConfig.value.screenWidth);
-			localStorage.setItem('screenHeight', windowConfig.value.screenHeight);
-		} catch (error) {
-			console.error('saveWinSizeItem');
-		}
-	}
+	done();
+}
 </script>
 
 <style lang="css" scoped>
-	.card-header {
-		font-weight: bold;
-	}
+.app-container {
+	height: 100vh;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
 
-	:deep(label) {
-		font-weight: 500;
-	}
+/* 边缘缩放区域 - 避开拖拽区域 */
+.resize-edge {
+	position: fixed;
+	z-index: 9998;
+	background: transparent;
+}
 
-	.el-button {
-		transition: all 0.5s ease;
-	}
+/* 顶部留给拖拽区域，通过角落缩放 */
+.resize-bottom {
+	bottom: 0;
+	left: 12px;
+	right: 12px;
+	height: 4px;
+	cursor: s-resize;
+}
 
-	.carousel-item {
-		color: #475669;
-		opacity: 0.75;
-		margin: 0;
-		text-align: center;
-	}
+.resize-left {
+	left: 0;
+	top: 36px;
+	bottom: 12px;
+	width: 4px;
+	cursor: w-resize;
+}
 
-	.el-carousel__item h3 {
-		color: #475669;
-		opacity: 0.75;
-		display: flex;
-		align-items: center;
-		margin: 0;
-		text-align: center;
-		height: 100%;
-	}
+.resize-right {
+	right: 0;
+	top: 36px;
+	bottom: 12px;
+	width: 4px;
+	cursor: e-resize;
+}
 
-	.el-carousel__item:nth-child(2n) {
-		background-color: #99a9bf;
-	}
+/* 角落缩放区域 */
+.resize-corner {
+	position: fixed;
+	z-index: 9999;
+	background: transparent;
+	width: 16px;
+	height: 16px;
+}
 
-	.el-carousel__item:nth-child(2n + 1) {
-		background-color: #d3dce6;
-	}
+.resize-tl {
+	top: 0;
+	left: 0;
+	cursor: nw-resize;
+}
 
-	.countdown-btn {
-		position: absolute;
-		top: 10%;
-		left: 90%;
-		transform: translate(-50%, -50%);
-		background-color: #4caf50;
-		color: white;
-		padding: 10px 20px;
-		border: none;
-		cursor: pointer;
-		z-index: 1;
-	}
+.resize-tr {
+	top: 0;
+	right: 0;
+	cursor: ne-resize;
+}
 
-	.butou-btn {
-		position: absolute;
-		top: 10%;
-		left: 90%;
-		transform: translate(-50%, -50%);
-		/*color: white;
-		 padding: 10px 20px;*/
-		border: none;
-		cursor: pointer;
-		z-index: 1;
-	}
+.resize-tr {
+	top: 0;
+	right: 0;
+	cursor: ne-resize;
+}
 
-	.demo-progress {
-		position: absolute;
-		top: 0px;
-		right: 226px;
-	}
+.resize-bl {
+	bottom: 0;
+	left: 0;
+	cursor: sw-resize;
+}
 
-	.percentage-value {
-		display: block;
-		margin-right: 18px;
-		font-size: 9px;
-	}
+.resize-br {
+	bottom: 0;
+	right: 0;
+	cursor: se-resize;
+}
 
-	.app-title {
-		position: absolute;
-		font-size: 16px;
-		font-weight: 'bold';
-		top: 5px;
-		left: 40px;
-	}
+/* 固定顶部 */
+.app-header {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 4px 10px;
+	font-size: 12px;
+	min-height: 32px;
+}
 
-	/* 不加padding会有滚动条 */
-	.app-header {
-		padding: 0 10px;
-		font-size: 12px;
-		height: 40px;
-	}
+.header-left {
+	display: flex;
+	align-items: center;
+	padding: 0 8px;
+}
 
-	.app-from {
-		overflow: hidden;
-		/* padding: 0 15px; */
-	}
+.header-right {
+	display: flex;
+	align-items: center;
+}
+
+/* 可滚动内容区 */
+.app-body {
+	flex: 1;
+	min-height: 0;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+}
+
+.app-form {
+	padding: 0;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+}
+
+/* Tab 填满高度 */
+.tab-panels {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+}
+
+.tab-panels :deep(.q-tab-panel) {
+	flex: 1;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+}
+
+.demo-progress {
+	margin-right: 6px;
+}
+
+.percentage-value {
+	display: block;
+	font-size: 8px;
+}
+
+.app-title {
+	font-size: 14px;
+	font-weight: bold;
+	margin-left: 8px;
+}
+
+.countdown-btn {
+	position: absolute;
+	top: 10%;
+	left: 90%;
+	transform: translate(-50%, -50%);
+	background-color: #4caf50;
+	color: white;
+	padding: 10px 20px;
+	border: none;
+	cursor: pointer;
+	z-index: 1;
+}
+
+.tab-panels {
+	background: transparent;
+}
+
+.tab-header {
+	background: rgba(0, 0, 0, 0.05);
+	flex-shrink: 0;
+}
+
+.body--dark .tab-header {
+	background: rgba(255, 255, 255, 0.05);
+}
+
+/* 投币弹窗样式 */
+.coin-dialog {
+	width: 320px;
+	max-width: 90vw;
+}
+
+.coin-dialog .coin-btn {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	z-index: 1;
+	min-width: 60px;
+}
+
+/* 退出弹窗样式 */
+.exit-dialog {
+	min-width: 200px;
+	max-width: 280px;
+	border-radius: 8px;
+}
 </style>
