@@ -6,7 +6,7 @@ export const useAppStore = defineStore('app', () => {
 	// 窗口配置
 	const winSetUp = ref(false);
 	const restoreWindow = ref(false);
-	const alwaysOnTop = ref(false);  // 初始化为 false，在 onMounted 中从后端获取
+	const alwaysOnTop = ref(false);
 	const screenWidth = ref((localStorage.getItem('screenWidth') || 750) * 1);
 	const screenHeight = ref((localStorage.getItem('screenHeight') || 385) * 1);
 	const maxScreenWidth = ref(window.screen.width * window.devicePixelRatio || 1920);
@@ -17,18 +17,8 @@ export const useAppStore = defineStore('app', () => {
 	const enablePath = ref(localStorage.getItem('enablePath') === 'true' || false);
 	const directoryPath = ref(localStorage.getItem('directoryPath') || '');
 
-	// 牛币余额
-	const nbBalance = ref((localStorage.getItem('nbBalance') || 100) * 1);
-
 	// 加载状态
 	const loading = ref(false);
-
-	// 对话框状态
-	const showNbDialog = ref(false);
-	const dialogBtnDisabled = ref(true);
-	const zaishuoyibian = ref(false);
-	const getQRStatus = ref(false);
-	const festivalInfo = ref(false);
 
 	// 退出提示
 	const exitTipList = [
@@ -45,9 +35,6 @@ export const useAppStore = defineStore('app', () => {
 		'好吧，记得想我',
 	];
 	const exitTipText = ref(exitTipList[Math.floor(Math.random() * exitTipList.length)]);
-
-	// 计算属性
-	const residuePercent = computed(() => nbBalance.value);
 
 	// 窗口操作
 	function minimize() {
@@ -128,49 +115,12 @@ export const useAppStore = defineStore('app', () => {
 		return isValid;
 	}
 
-	// 余额管理
-	function checkNbBalance(isInit = false, consume = 0) {
-		if (!isInit && nbBalance.value <= consume) {
-			showNbDialog.value = true;
-			dialogBtnDisabled.value = true;
-			setTimeout(() => {
-				dialogBtnDisabled.value = false;
-			}, 3000);
-			return true;
-		}
-		return false;
-	}
-
-	function consumeNb(amount) {
-		nbBalance.value = Math.max(nbBalance.value - amount, 0);
-		localStorage.setItem('nbBalance', nbBalance.value);
-	}
-
-	function addNb(amount) {
-		nbBalance.value = Math.min(nbBalance.value + amount, 100);
-		localStorage.setItem('nbBalance', nbBalance.value);
-	}
-
 	// 加载状态
 	function setLoading(val) {
 		loading.value = val;
 	}
 
-	// 节日检查
-	function checkFestival() {
-		const today = new Date();
-		const month = today.getMonth() + 1;
-		const day = today.getDate();
-
-		if (month === 1 && day >= 1 && day <= 7) {
-			festivalInfo.value = true;
-			setTimeout(() => {
-				festivalInfo.value = false;
-			}, 91500);
-		}
-	}
-
-	// 窗口配置对象（用于传递给 SettingsDrawer）
+	// 窗口配置对象
 	const windowConfig = computed(() => ({
 		winSetUp: winSetUp.value,
 		restoreWindow: restoreWindow.value,
@@ -179,9 +129,6 @@ export const useAppStore = defineStore('app', () => {
 		maxScreenWidth: maxScreenWidth.value,
 		maxscreenHeight: maxscreenHeight.value,
 		exitTipText: exitTipText.value,
-		getQRStatus: getQRStatus.value,
-		zaishuoyibian: zaishuoyibian.value,
-		festivalInfo: festivalInfo.value,
 		directoryType: directoryType.value,
 		enablePath: enablePath.value,
 		directoryPath: directoryPath.value,
@@ -199,15 +146,8 @@ export const useAppStore = defineStore('app', () => {
 		directoryType,
 		enablePath,
 		directoryPath,
-		nbBalance,
 		loading,
-		showNbDialog,
-		dialogBtnDisabled,
-		zaishuoyibian,
-		getQRStatus,
-		festivalInfo,
 		exitTipText,
-		residuePercent,
 		windowConfig,
 
 		// 方法
@@ -221,10 +161,6 @@ export const useAppStore = defineStore('app', () => {
 		changeDirectory,
 		updateDirectoryPath,
 		checkPath,
-		checkNbBalance,
-		consumeNb,
-		addNb,
 		setLoading,
-		checkFestival,
 	};
 });
