@@ -143,18 +143,56 @@ pip install pyinstaller
 
 ### 打包命令
 
-#### Windows
+#### 普通环境
+
+**Windows**
 ```bash
 pyinstaller -i assets/logo.ico --name 开心果 --windowed --clean --noconfirm --onefile --add-data "assets;assets" --add-data "gui;gui" main.py
 ```
 
-#### Mac
+**Mac**
 ```bash
 pyinstaller -i assets/ico.icns --name 开心果 --windowed --clean --noconfirm --onefile --add-data ./assets:./assets --add-data ./gui:./gui main.py
 ```
 
-#### Linux
+**Linux**
 ```bash
 pyinstaller --name 开心果 --windowed --clean --noconfirm --onefile --add-data "./assets:./assets" --add-data "./gui:./gui" main.py
+```
+
+#### 虚拟环境
+
+**Windows**
+```bash
+# 创建虚拟环境（如果没有）
+python -m venv venv
+
+# 激活虚拟环境
+venv\Scripts\activate
+
+# 安装依赖
+pip install -r requirements.txt
+pip install pyinstaller
+
+# 构建前端并打包
+cd gui && npm run build && cd ..
+venv\Scripts\pyinstaller.exe -i assets/logo.ico --name 开心果 --windowed --clean --noconfirm --onefile --add-data "assets;assets" --add-data "gui;gui" main.py
+```
+
+**Mac/Linux**
+```bash
+# 创建虚拟环境（如果没有）
+python3 -m venv venv
+
+# 激活虚拟环境
+source venv/bin/activate
+
+# 安装依赖
+pip install -r requirements.txt
+pip install pyinstaller
+
+# 构建前端并打包
+cd gui && npm run build && cd ..
+pyinstaller -i assets/ico.icns --name 开心果 --windowed --clean --noconfirm --onefile --add-data ./assets:./assets --add-data ./gui:./gui main.py
 ```
 
