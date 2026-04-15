@@ -53,4 +53,10 @@ html, body {
 	padding: 0 !important;
 }
 
+/* View Transitions 深色模式切换动画 - 禁用默认动画，由 JS 控制 */
+::view-transition-old(root),
+::view-transition-new(root) {
+	animation: none !important;
+}
+
 </style>

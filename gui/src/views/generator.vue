@@ -17,12 +17,12 @@
 			</div>
 			<div class="header-right">
 				<q-toggle
-					v-model="isDark"
-					@update:model-value="toggleDark"
+					:model-value="isDark"
 					checked-icon="dark_mode"
 					unchecked-icon="light_mode"
 					size="sm"
-					class="q-mr-sm"
+					class="q-mr-sm dark-toggle"
+					@click.stop="toggleDarkClick"
 				/>
 				<q-btn flat round dense icon="push_pin" :color="appStore.alwaysOnTop ? 'primary' : 'grey-6'" @click="toggleAlwaysOnTop" size="sm" :style="{ opacity: appStore.alwaysOnTop ? 1 : 0.5 }" />
 				<q-btn flat round dense icon="remove" color="grey-7" @click="minimize" size="sm" />
@@ -99,10 +99,71 @@ const activeTab = ref('basic');
 // 深色模式
 const isDark = ref(Dark.isActive);
 
-function toggleDark() {
-	Dark.toggle();
-	isDark.value = Dark.isActive;
-	localStorage.setItem('darkMode', Dark.isActive);
+async function toggleDark(event) {
+	// 获取点击位置
+	const x = event?.clientX ?? window.innerWidth / 2;
+	const y = event?.clientY ?? window.innerHeight / 2;
+
+	// 兼容性检查
+	if (!document.startViewTransition) {
+		Dark.toggle();
+		isDark.value = Dark.isActive;
+		localStorage.setItem('darkMode', Dark.isActive);
+		return;
+	}
+
+	const wasDark = isDark.value;
+	const endRadius = Math.hypot(
+		Math.max(x, window.innerWidth - x),
+		Math.max(y, window.innerHeight - y)
+	);
+
+	// 动态设置层级样式
+	const styleId = 'dark-transition-override';
+	let style = document.getElementById(styleId);
+	if (!style) {
+		style = document.createElement('style');
+		style.id = styleId;
+		document.head.appendChild(style);
+	}
+
+	// 根据切换方向设置不同的 z-index
+	style.textContent = wasDark
+		? `::view-transition-old(root) { z-index: 999; animation: none; }
+		   ::view-transition-new(root) { z-index: 1; animation: none; }`
+		: `::view-transition-old(root) { z-index: 1; animation: none; }
+		   ::view-transition-new(root) { z-index: 999; animation: none; }`;
+
+	const transition = document.startViewTransition(() => {
+		Dark.toggle();
+		isDark.value = Dark.isActive;
+		localStorage.setItem('darkMode', Dark.isActive);
+	});
+
+	await transition.ready;
+
+	const animation = document.documentElement.animate(
+		{
+			clipPath: wasDark
+				? [`circle(${endRadius}px at ${x}px ${y}px)`, `circle(0px at ${x}px ${y}px)`]
+				: [`circle(0px at ${x}px ${y}px)`, `circle(${endRadius}px at ${x}px ${y}px)`]
+		},
+		{
+			duration: 400,
+			easing: 'ease-out',
+			pseudoElement: wasDark
+				? '::view-transition-old(root)'
+				: '::view-transition-new(root)'
+		}
+	);
+
+	await animation.finished;
+	style.textContent = '';
+}
+
+// 点击切换按钮的处理函数
+function toggleDarkClick(event) {
+	toggleDark(event);
 }
 
 // 初始化深色模式
