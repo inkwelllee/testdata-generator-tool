@@ -59,7 +59,7 @@
 
 			<q-card-actions align="right" class="q-px-sm q-pb-sm">
 				<div class="text-caption text-grey" @click="handleVersionClick" style="cursor: pointer; user-select: none;">
-					版本：0.6.3.17
+					版本：0.6.4.15
 				</div>
 			</q-card-actions>
 		</q-card>
