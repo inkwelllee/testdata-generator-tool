@@ -4,24 +4,40 @@
 		<meta charset="UTF-8" />
 		<link rel="icon" href="./favicon.ico" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Gen Tool</title>
-		<script type="module" crossorigin src="./assets/index-QZsXfdKX.js"></script>
-		<link rel="stylesheet" crossorigin href="./assets/index-BgNk4UhP.css">
+		<title>不娇虑</title>
+		<style>
+			/* 彻底隐藏滚动条 - 尽早生效 */
+			html, body {
+				margin: 0;
+				padding: 0;
+				width: 100%;
+				height: 100%;
+				overflow: hidden !important;
+			}
+			::-webkit-scrollbar {
+				display: none !important;
+				width: 0 !important;
+				height: 0 !important;
+			}
+			* {
+				scrollbar-width: none !important;
+				-ms-overflow-style: none !important;
+			}
+			/* 拖动区域 - 覆盖 header 左侧标题区域 */
+			.pywebview-drag-region {
+				position: fixed;
+				top: 0;
+				left: 30px;
+				right: 200px;
+				height: 32px;
+				z-index: 1;
+			}
+		</style>
+		<script type="module" crossorigin src="./assets/index-D90Ny7IZ.js"></script>
+		<link rel="stylesheet" crossorigin href="./assets/index-rV6HZjT7.css">
 	</head>
 	<body>
 		<div id="pywebview-drag-region" class="pywebview-drag-region"></div>
-		<div id="app"></div>
+		<div id="app"></div>
 	</body>
-
-	<style>
-		/* 拖动区域 */
-		.pywebview-drag-region {
-			height: 35px;
-			width: 150px;
-			left: 58px;
-			/* background-color: #ffffff;	 */
-			position: absolute;
-			z-index: 9999;
-		}
-	</style>
 </html>

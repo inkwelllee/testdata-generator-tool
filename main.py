@@ -82,9 +82,11 @@ def main():
     logging.info(f"窗口置顶状态: {always_on_top}")
 
     # 创建窗口（居中显示）
+    #window = webview.create_window(title='bujiaolv', url='http://localhost:8098', width=init_width, height=init_height, x=center_x, y=center_y, js_api=api, resizable=True, on_top=always_on_top, text_select=False, confirm_close=False, frameless=True, easy_drag=False)
+    #window = webview.create_window(title='bujiaolv', url='http://inkwell.top/gen_ui', width=init_width, height=init_height, js_api=api, resizable=True, on_top=always_on_top, text_select=False, confirm_close=False, frameless=True, easy_drag=False)
     window = webview.create_window(
-        title='不娇虑',
-        url='http://localhost:8098',
+        'bujiaolv',
+        'assets/ui/index.html', 
         width=init_width,
         height=init_height,
         x=center_x,
