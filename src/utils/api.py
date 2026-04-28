@@ -1,7 +1,10 @@
 """
 API类模块 - 提供给前端调用的接口
 """
+import json
 import logging
+import os
+import sys
 from typing import Dict, Optional
 
 from src.generators import (
@@ -15,6 +18,40 @@ from src.generators import (
 from src.services import ImageService, PathService
 from src.configs import ConfigManager
 from .cache_manager import clear_webview_cache, get_cache_info, format_size
+
+
+# 窗口配置文件路径
+def get_window_config_path() -> str:
+    """获取窗口配置文件路径"""
+    if sys.platform == "win32":
+        base_dir = os.path.join(os.environ.get('APPDATA', ''), 'pywebview')
+    else:
+        base_dir = os.path.join(os.path.expanduser('~'), '.pywebview')
+    return os.path.join(base_dir, 'window_config.json')
+
+
+def load_window_config() -> Dict:
+    """加载窗口配置"""
+    config_path = get_window_config_path()
+    try:
+        if os.path.exists(config_path):
+            with open(config_path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+    except Exception as e:
+        logging.error(f"加载窗口配置失败: {e}")
+    return {'alwaysOnTop': False}
+
+
+def save_window_config(config: Dict) -> None:
+    """保存窗口配置"""
+    config_path = get_window_config_path()
+    try:
+        # 确保目录存在
+        os.makedirs(os.path.dirname(config_path), exist_ok=True)
+        with open(config_path, 'w', encoding='utf-8') as f:
+            json.dump(config, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        logging.error(f"保存窗口配置失败: {e}")
 
 
 class Api:
@@ -182,6 +219,27 @@ class Api:
     def resizeApp(self, width: int, height: int) -> None:
         """调整窗口大小"""
         self._window.resize(width, height)
+
+    def toggleAlwaysOnTop(self) -> bool:
+        """切换窗口置顶状态"""
+        try:
+            logging.info(f"当前 on_top 状态: {self._window.on_top}")
+            self._window.on_top = not self._window.on_top
+            new_state = self._window.on_top
+            logging.info(f"切换后 on_top 状态: {new_state}")
+            # 保存配置
+            config = load_window_config()
+            config['alwaysOnTop'] = new_state
+            save_window_config(config)
+            return new_state
+        except Exception as e:
+            logging.error(f"设置置顶状态失败: {e}", exc_info=True)
+            return False
+
+    def getAlwaysOnTop(self) -> bool:
+        """获取保存的置顶状态"""
+        config = load_window_config()
+        return config.get('alwaysOnTop', False)
 
     def test(self) -> None:
         """测试方法"""

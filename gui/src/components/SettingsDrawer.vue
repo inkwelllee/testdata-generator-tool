@@ -1,121 +1,131 @@
 <template>
-	<el-drawer :model-value="visible" @update:model-value="$emit('update:visible', $event)" :before-close="beforeClose" direction="ltr" size="400px">
-		<template #header>
-			<h4>设置</h4>
-		</template>
-		<template #default>
-			<div>
-				<h5>窗口设置</h5>
-				<el-button plain type="primary" :icon="Menu" size="small" @click="resizeApp('resize')">还原默认大小</el-button>
+	<n-drawer :show="visible" :width="360" placement="left" @update:show="handleUpdateShow">
+		<n-drawer-content title="设置" closable>
+			<div class="settings-section">
+				<n-text depth="3" style="font-weight: 500; margin-bottom: 8px; display: block">窗口设置</n-text>
+				<n-button size="small" @click="resizeApp('resize')">还原默认大小</n-button>
 			</div>
-			<div class="slider-demo-block">
-				<span class="demonstration">窗口宽度</span>
-				<el-slider v-model="config.screenWidth" @input="resizeApp" @change="saveWinSizeItem" :min="700" :max="config.maxScreenWidth" :step="1" show-input size="small" />
+
+			<div class="settings-section">
+				<n-text depth="3" style="font-weight: 500; margin-bottom: 8px; display: block">窗口宽度</n-text>
+				<n-slider
+					v-model:value="config.screenWidth"
+					@update:value="resizeApp"
+					@change="saveWinSizeItem"
+					:min="900"
+					:max="config.maxScreenWidth"
+					:step="1"
+				/>
 			</div>
-			<div class="slider-demo-block">
-				<span class="demonstration">窗口高度</span>
-				<el-slider v-model="config.screenHeight" @input="resizeApp" @change="saveWinSizeItem" :min="300" :max="config.maxscreenHeight" :step="1" show-input size="small" />
+
+			<div class="settings-section">
+				<n-text depth="3" style="font-weight: 500; margin-bottom: 8px; display: block">窗口高度</n-text>
+				<n-slider
+					v-model:value="config.screenHeight"
+					@update:value="resizeApp"
+					@change="saveWinSizeItem"
+					:min="500"
+					:max="config.maxscreenHeight"
+					:step="1"
+				/>
 			</div>
-			<div>
-				<h5>生成目录</h5>
-				<el-radio-group v-model="config.directoryType" @change="changeDirectory" size="small">
-					<el-radio-button label="桌面" value="desktop" />
-					<el-radio-button label="跟随应用" value="follow" />
-					<el-radio-button label="自定义" value="diy" />
-				</el-radio-group>
-				<div>
-					<el-input
-						v-model="config.directoryPath"
-						placeholder="例：D:\下载 ，输入完请点击后方按钮检测是否可用"
-						:disabled="config.directoryType !== 'diy'"
-						@change="changePath"
-						size="small"
-					>
-						<!-- <template #prepend>目录</template> -->
-						<template #append>
-							<el-button :disabled="config.directoryType !== 'diy'" @click="checkPath()">
-								<el-icon v-if="config.enablePath || config.directoryType !== 'diy'" color="#69ffb4"><Select /></el-icon>
-								<el-icon v-else color="#d8e510"><RefreshRight /></el-icon>
-							</el-button>
-						</template>
-					</el-input>
+
+			<div class="settings-section">
+				<n-text depth="3" style="font-weight: 500; margin-bottom: 12px; display: block">生成目录</n-text>
+				<n-radio-group v-model:value="config.directoryType" @update:value="changeDirectory" size="small">
+					<n-radio-button value="desktop">桌面</n-radio-button>
+					<n-radio-button value="follow">跟随应用</n-radio-button>
+					<n-radio-button value="diy">自定义</n-radio-button>
+				</n-radio-group>
+				<div style="margin-top: 12px">
+					<n-input-group>
+						<n-input
+							v-model:value="config.directoryPath"
+							placeholder="例：D:\下载，输入完请点击后方按钮检测"
+							:disabled="config.directoryType !== 'diy'"
+							@update:value="changePath"
+							size="small"
+						/>
+						<n-button size="small" :disabled="config.directoryType !== 'diy'" @click="checkPath()">
+							<template #icon>
+								<n-icon :color="config.enablePath || config.directoryType !== 'diy' ? '#18a058' : '#f0a020'">
+									<CheckmarkCircleOutline v-if="config.enablePath || config.directoryType !== 'diy'" />
+									<RefreshOutline v-else />
+								</n-icon>
+							</template>
+						</n-button>
+					</n-input-group>
 				</div>
 			</div>
-		</template>
-		<template #footer>
-			<div style="flex: auto">
-				<h6 @click="handleVersionClick" style="cursor: pointer; user-select: none;">版本：0.5.11.5</h6>
-			</div>
-		</template>
-	</el-drawer>
+
+			<template #footer>
+				<n-text depth="3" style="cursor: pointer; user-select: none" @click="handleVersionClick">
+					版本：0.6.4.28
+				</n-text>
+			</template>
+		</n-drawer-content>
+	</n-drawer>
 </template>
 
 <script setup>
-	import { ref } from 'vue';
-	import { Menu, Select, RefreshRight } from '@element-plus/icons-vue';
-	import { ElMessage } from 'element-plus';
+import { ref } from 'vue';
+import { useMessage } from 'naive-ui';
+import { CheckmarkCircleOutline, RefreshOutline } from '@vicons/ionicons5';
 
-	defineProps({
-		visible: Boolean,
-		config: Object,
-		resizeApp: Function,
-		saveWinSizeItem: Function,
-		changeDirectory: Function,
-		changePath: Function,
-		checkPath: Function,
-		beforeClose: Function,
-	});
+const message = useMessage();
 
-	defineEmits(['update:visible']);
+const props = defineProps({
+	visible: Boolean,
+	config: Object,
+	resizeApp: Function,
+	saveWinSizeItem: Function,
+	changeDirectory: Function,
+	changePath: Function,
+	checkPath: Function,
+	beforeClose: Function,
+});
 
-	const clickCount = ref(0);
-	const lastClickTime = ref(0);
+const emit = defineEmits(['update:visible']);
 
-	function handleVersionClick() {
-		const currentTime = new Date().getTime();
-		if (currentTime - lastClickTime.value > 1000) {
-			clickCount.value = 0;
-		}
-		
-		clickCount.value++;
-		lastClickTime.value = currentTime;
+function handleUpdateShow(val) {
+	if (!val && props.beforeClose) {
+		props.beforeClose(() => {
+			emit('update:visible', false);
+		});
+	} else {
+		emit('update:visible', val);
+	}
+}
 
-		if (clickCount.value >= 5) {
-			clickCount.value = 0;
-			try {
-				if (window.pywebview) {
-					window.pywebview.api.clearCache().then(res => {
-						ElMessage.success(res);
-					});
-				}
-			} catch (e) {
-				console.error(e);
+const clickCount = ref(0);
+const lastClickTime = ref(0);
+
+function handleVersionClick() {
+	const currentTime = new Date().getTime();
+	if (currentTime - lastClickTime.value > 1000) {
+		clickCount.value = 0;
+	}
+
+	clickCount.value++;
+	lastClickTime.value = currentTime;
+
+	if (clickCount.value >= 5) {
+		clickCount.value = 0;
+		try {
+			if (window.pywebview) {
+				window.pywebview.api.clearCache().then(res => {
+					message.success(res);
+				});
 			}
+		} catch (e) {
+			console.error(e);
 		}
 	}
+}
 </script>
 
 <style scoped>
-	.slider-demo-block {
-		max-width: 600px;
-		display: flex;
-		align-items: center;
-	}
-	.slider-demo-block .el-slider {
-		margin-top: 0;
-		margin-left: 12px;
-	}
-	.slider-demo-block .demonstration {
-		font-size: 14px;
-		color: var(--el-text-color-secondary);
-		line-height: 44px;
-		flex: 1;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-		margin-bottom: 0;
-	}
-	.slider-demo-block .demonstration + .el-slider {
-		flex: 0 0 80%;
-	}
+.settings-section {
+	margin-bottom: 20px;
+}
 </style>

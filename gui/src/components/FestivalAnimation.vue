@@ -1,73 +1,6 @@
 <template>
 	<div class="festival-container">
 		<canvas ref="canvasRef" class="canvas"></canvas>
-		<div class="overlay">
-			<div class="tabs">
-				<div class="tabs-labels">
-					<span class="tabs-label">Commands</span>
-					<span class="tabs-label">Info</span>
-					<span class="tabs-label">Share</span>
-				</div>
-				<div class="tabs-panels">
-					<ul class="tabs-panel commands">
-						<li class="commands-item">
-							<div class="commands-item-content">
-								<span class="commands-item-title">Text</span>
-								<span class="commands-item-info" data-demo="Hello :)">Type anything</span>
-							</div>
-							<span class="commands-item-action">Demo</span>
-						</li>
-						<li class="commands-item">
-							<div class="commands-item-content">
-								<span class="commands-item-title">Countdown</span>
-								<span class="commands-item-info" data-demo="#countdown 10">#countdown<span class="commands-item-mode">number</span></span>
-							</div>
-							<span class="commands-item-action">Demo</span>
-						</li>
-						<li class="commands-item">
-							<div class="commands-item-content">
-								<span class="commands-item-title">Icon</span>
-								<span class="commands-item-info" data-demo="#icon thumbs-up">#icon<span class="commands-item-mode">name</span>&nbsp;(using <a href="//fortawesome.github.io/Font-Awesome/#icons-new" target="_blank">Font Awesome</a>)</span>
-							</div>
-							<span class="commands-item-action">Demo</span>
-						</li>
-						<li class="commands-item">
-							<div class="commands-item-content">
-								<span class="commands-item-title">Time</span>
-								<span class="commands-item-info" data-demo="#time">#time</span>
-							</div>
-							<span class="commands-item-action">Demo</span>
-						</li>
-						<li class="commands-item">
-							<div class="commands-item-content">
-								<span class="commands-item-title">Rectangle</span>
-								<span class="commands-item-info" data-demo="#rectangle 30x15">#rectangle<span class="commands-item-mode">width x height</span></span>
-							</div>
-							<span class="commands-item-action">Demo</span>
-						</li>
-						<li class="commands-item">
-							<div class="commands-item-content">
-								<span class="commands-item-title">Circle</span>
-								<span class="commands-item-info" data-demo="#circle 25">#circle<span class="commands-item-mode">diameter</span></span>
-							</div>
-							<span class="commands-item-action">Demo</span>
-						</li>
-						<li class="commands-item commands-item--gap">
-							<div class="commands-item-content">
-								<span class="commands-item-title">Animate</span>
-								<span class="commands-item-info" data-demo="The time is|#time|#countdown 3|#icon thumbs-up">
-									<span class="commands-item-mode">command1</span>&nbsp;|<span class="commands-item-mode">command2</span>
-								</span>
-							</div>
-							<span class="commands-item-action">Demo</span>
-						</li>
-					</ul>
-					<div class="tabs-panel ui-details">
-						<div class="ui-details-content"></div>
-					</div>
-				</div>
-			</div>
-		</div>
 		<audio ref="audioRef" autoplay loop>
 			<source src="http://music.163.com/song/media/outer/url?id=1976115393.mp3" type="audio/mpeg">
 		</audio>
@@ -87,19 +20,16 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-	// 清理资源
 	if (S.interval) {
 		clearInterval(S.interval);
 	}
 });
 
 function initFestivalAnimation() {
-	// 创建一个Date对象，表示当前日期和时间
 	const currentDate = new Date();
-	// 获取当前年份
 	const currentYear = currentDate.getFullYear();
 
-	const str_text = 
+	const str_text =
 		'HAPPY NEW YEAR|新年倒计时|5|4|3|2|1|' +
 		currentYear +
 		'|新的征程|新的希望|凡是过往|皆是序章|福启新岁|万事顺遂|梦想成真|' +
@@ -111,7 +41,7 @@ function initFestivalAnimation() {
 			S.Drawing.init(canvasRef.value);
 			S.ShapeBuilder.init();
 			S.UI.init();
-			
+
 			S.UI.simulate(str_text);
 
 			S.Drawing.loop(function () {
@@ -296,9 +226,7 @@ function initFestivalAnimation() {
 		}
 
 		return {
-			init: function () {
-				// 初始化UI
-			},
+			init: function () {},
 			simulate: function (action) {
 				performAction(action);
 			},
@@ -591,7 +519,6 @@ function initFestivalAnimation() {
 		};
 	})();
 
-	// 初始化动画
 	S.init();
 }
 </script>
@@ -607,153 +534,5 @@ function initFestivalAnimation() {
 
 .canvas {
 	display: block;
-}
-
-/* 以下是从原HTML文件转换的样式 */
-.overlay {
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	width: 550px;
-	height: 490px;
-	margin: -260px 0 0 -275px;
-	opacity: 0;
-	transform: rotateY(90deg);
-	transition: transform 0.7s cubic-bezier(0.694, 0.0482, 0.335, 1), opacity 0.7s cubic-bezier(0.694, 0.0482, 0.335, 1);
-}
-
-.overlay--visible {
-	opacity: 1;
-	transform: rotateY(0);
-}
-
-.tabs-labels {
-	margin-bottom: 9px;
-}
-
-.tabs-label {
-	display: inline-block;
-	background: #fff;
-	padding: 10px 20px;
-	font-size: 12px;
-	line-height: 22px;
-	font-weight: 700;
-	text-transform: uppercase;
-	letter-spacing: 1px;
-	color: #333;
-	opacity: 0.5;
-	cursor: pointer;
-	margin-right: 2px;
-	transition: opacity 0.1s cubic-bezier(0.694, 0.0482, 0.335, 1);
-}
-
-.tabs-label:hover {
-	opacity: 0.9;
-}
-
-.tabs-label--active {
-	opacity: 0.9;
-}
-
-.tabs-panel {
-	display: none;
-}
-
-.tabs-panel--active {
-	display: block;
-}
-
-.commands {
-	margin: 0;
-	padding: 0;
-	list-style: none;
-	cursor: pointer;
-}
-
-.commands-item {
-	font-size: 12px;
-	line-height: 22px;
-	font-weight: 700;
-	text-transform: uppercase;
-	letter-spacing: 1px;
-	padding: 20px;
-	background: #fff;
-	margin-top: 1px;
-	color: #333;
-	opacity: 0.9;
-	transition: transform 0.1s cubic-bezier(0.694, 0.0482, 0.335, 1), opacity 0.1s cubic-bezier(0.694, 0.0482, 0.335, 1);
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-}
-
-.commands-item--gap {
-	margin-top: 9px;
-}
-
-.commands-item:hover {
-	opacity: 1;
-}
-
-.commands-item:hover .commands-item-action {
-	background: #333;
-}
-
-.commands-item a {
-	display: inline-block;
-}
-
-.commands-item-mode {
-	display: inline-block;
-	margin-left: 3px;
-	font-style: italic;
-	color: #ccc;
-}
-
-.commands-item-content {
-	display: flex;
-	flex: 1;
-	min-width: 0;
-}
-
-.commands-item-title {
-	display: inline-block;
-	width: 150px;
-	flex-shrink: 0;
-}
-
-.commands-item-info {
-	display: inline-block;
-	flex: 1;
-	font-size: 14px;
-	text-transform: none;
-	letter-spacing: 0;
-	font-weight: 400;
-	color: #aaa;
-}
-
-.commands-item-action {
-	text-transform: uppercase;
-	font-size: 10px;
-	line-height: 10px;
-	color: #fff;
-	background: #90c9d1;
-	padding: 5px 10px 4px;
-	border-radius: 3px;
-	flex-shrink: 0;
-}
-
-.commands-item:first-child {
-	margin-top: 0;
-}
-
-.ui-details {
-	opacity: 0.9;
-	background: #fff;
-	z-index: 2;
-}
-
-.ui-details-content {
-	padding: 100px 50px;
 }
 </style>

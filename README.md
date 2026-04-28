@@ -119,10 +119,11 @@ yarn install
 
 ### 前端主要依赖包
 - **Vue 3**: 前端框架
-- **Element Plus**: UI组件库
+- **Naive UI**: UI组件库
 - **Vite**: 构建工具
-- **Axios**: HTTP客户端
-- **Moment.js**: 日期处理
+- **Vue Router**: 路由管理
+- **@vueuse/core**: Vue组合式API工具库
+- **vue-clipboard2**: 剪贴板功能
 
 ## 运行程序
 
@@ -212,10 +213,11 @@ pyinstaller --name 测试数据生成器 --windowed --clean --noconfirm --onefil
 ## 开发说明
 
 ### 前端开发
-- 前端使用Vue 3 + Element Plus开发
+- 前端使用Vue 3 + Naive UI开发
 - 支持热重载开发模式
 - 构建完成后自动复制到 `assets/ui/` 目录
 - 节日动画组件支持特定日期显示
+- 支持深色/浅色主题切换
 
 ### 后端开发  
 - 模块化设计，功能分离

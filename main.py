@@ -6,7 +6,7 @@ import logging
 
 # 导入自定义模块
 from src.utils.logger import setup_logging, log_startup_info
-from src.utils.api import Api
+from src.utils.api import Api, load_window_config
 from src.utils.cache_manager import clear_webview_cache
 
 # 配置选项
@@ -70,22 +70,28 @@ def main():
     # 设置MIME类型
     mimetypes.add_type('application/javascript', '.js')
     logging.info("程序开始执行 => mimetypes")
-    
+
+    # 读取窗口配置
+    window_config = load_window_config()
+    always_on_top = window_config.get('alwaysOnTop', False)
+    logging.info(f"窗口置顶状态: {always_on_top}")
+
     # 创建窗口
-    #window = webview.create_window(title='BlingBling', url='http://localhost:8098', width=initWidth, height=initHeight, js_api=api, resizable=True, text_select=False, confirm_close=False, frameless=True, easy_drag=False)
-    #window = webview.create_window(title='BlingBling', url='http://inkwell.top/gen_ui', width=initWidth, height=initHeight, js_api=api, resizable=True, text_select=False, confirm_close=False, frameless=True, easy_drag=False)
-    window = webview.create_window(
-        'BlingBling',
-        'assets/ui/index.html', 
-        width=initWidth, 
-        height=initHeight, 
-        js_api=api, 
-        resizable=True, 
-        text_select=False, 
-        confirm_close=False, 
-        frameless=True, 
-        easy_drag=False
-    )
+    window = webview.create_window(title='BlingBling', url='http://localhost:8098', width=initWidth, height=initHeight, js_api=api, resizable=True, on_top=always_on_top, text_select=False, confirm_close=False, frameless=True, easy_drag=False)
+    #window = webview.create_window(title='BlingBling', url='http://inkwell.top/gen_ui', width=initWidth, height=initHeight, js_api=api, resizable=True, on_top=always_on_top, text_select=False, confirm_close=False, frameless=True, easy_drag=False)
+    #window = webview.create_window(
+    #    'BlingBling',
+    #    'assets/ui/index.html',
+    #    width=initWidth,
+    #    height=initHeight,
+    #    js_api=api,
+    #    resizable=True,
+    #    on_top=always_on_top,
+    #    text_select=False,
+    #    confirm_close=False,
+    #    frameless=True,
+    #    easy_drag=False
+    #)
     logging.info("程序开始执行 => window")
     
     api.set_window(window)

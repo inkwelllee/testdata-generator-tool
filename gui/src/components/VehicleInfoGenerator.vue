@@ -1,143 +1,111 @@
 <template>
-	<el-row :gutter="15">
-		<el-col :span="8">
-			<el-card style="height: 500px">
-				<template #header>
-					<div class="card-header">
-						<span>车辆信息</span>
-					</div>
-				</template>
-				<el-row :gutter="10" v-for="(label, field) in vehicleInfoFields" :key="field">
-					<el-col :span="24">
-						<el-form-item :label="label">
-							<el-col :span="24">
-								<el-input v-model="formData[field]" readonly @click="copy(field)" style="cursor: pointer">
-									<template #append>
-										<el-button :icon="Pointer" @click="generator(field)"></el-button>
-									</template>
-								</el-input>
-							</el-col>
-						</el-form-item>
-					</el-col>
-				</el-row>
-			</el-card>
-		</el-col>
-	</el-row>
-	<!-- 按钮 -->
-	<el-row :gutter="15" style="padding-top: 10px">
-		<el-col :span="24">
-			<el-form-item>
-				<div class="mb-4">
-					<el-button type="primary" :icon="Pointer" @click="generator('all')"> 生成 </el-button>
-					<el-button type="info" :icon="Refresh" @click="resetForm">重置</el-button>
-				</div>
-			</el-form-item>
-		</el-col>
-	</el-row>
+	<div class="generator-container">
+		<n-grid :cols="3" :x-gap="12" :y-gap="8">
+			<n-gi>
+				<n-card title="车辆信息" size="small" :bordered="true">
+					<n-form-item v-for="(label, field) in vehicleInfoFields" :key="field" :label="label" label-placement="left" label-width="80">
+						<n-input-group>
+							<n-input v-model:value="formData[field]" readonly @click="copy(field)" size="small" style="cursor: pointer" />
+							<n-button size="small" @click="generator(field)">
+								<template #icon><n-icon><FingerPrintOutline /></n-icon></template>
+							</n-button>
+						</n-input-group>
+					</n-form-item>
+				</n-card>
+			</n-gi>
+		</n-grid>
+
+		<!-- 按钮 -->
+		<n-space style="padding-top: 12px; justify-content: flex-start">
+			<n-button type="primary" size="small" @click="generator('all')">
+				<template #icon><n-icon><FingerPrintOutline /></n-icon></template>
+				生成
+			</n-button>
+			<n-button size="small" @click="resetForm">
+				<template #icon><n-icon><RefreshOutline /></n-icon></template>
+				重置
+			</n-button>
+		</n-space>
+	</div>
 </template>
 
 <script setup>
-	import { ref, onMounted } from 'vue';
-	import { CopyDocument, Pointer, Refresh } from '@element-plus/icons-vue';
-	import { copyToClipboard } from '@/utils';
+import { ref, onMounted } from 'vue';
+import { useMessage } from 'naive-ui';
+import { RefreshOutline, FingerPrintOutline } from '@vicons/ionicons5';
+import { copyToClipboard } from '@/utils';
 
-	const props = defineProps({
-		checkNbBalance: Function,
-		setFormLoading: Function,
-		consumeNb: Function,
-	});
+const message = useMessage();
 
-	const formData = ref({
-		licensePlate: '',
-		vin: '',
-		engineNo: '',
-		address: '',
-	});
+const props = defineProps({
+	checkNbBalance: Function,
+	setFormLoading: Function,
+	consumeNb: Function,
+});
 
-	const vehicleInfoFields = {
-		licensePlate: '车牌号',
-		vin: '车架号',
-		engineNo: '发动机号',
-		address: '所在位置',
-	};
+const formData = ref({
+	licensePlate: '',
+	vin: '',
+	engineNo: '',
+	address: '',
+});
 
-	onMounted(() => {
-		if (window.pywebview) {
-			generator('all', true);
-		} else {
-			window.addEventListener('pywebviewready', () => {
-				generator('all', true);
-			});
-		}
-	});
+const vehicleInfoFields = {
+	licensePlate: '车牌号',
+	vin: '车架号',
+	engineNo: '发动机号',
+	address: '所在位置',
+};
 
-	function generator(type, isInit = false) {
-		if (props.checkNbBalance(isInit)) {
-			return;
-		}
-
-		props.setFormLoading(true);
-
-		try {
-			if (type === 'licensePlate') {
-				window.pywebview.api.randomLicensePlate().then(val => {
-					formData.value.licensePlate = val;
-				});
-			} else if (type === 'vin') {
-				window.pywebview.api.randomVIN().then(val => {
-					formData.value.vin = val;
-				});
-			} else if (type === 'engineNo') {
-				window.pywebview.api.randomEngineNo().then(val => {
-					formData.value.engineNo = val;
-				});
-			} else if (type === 'address') {
-				window.pywebview.api.randomAddress().then(val => {
-					formData.value.address = val;
-				});
-			} else if (type === 'all') {
-				Object.keys(vehicleInfoFields).forEach(field => {
-					generator(field);
-				});
-			}
-		} catch (error) {
-			console.error('generator');
-			return;
-		}
-
-		setTimeout(async () => {
-			props.setFormLoading(false);
-			if (!isInit && type === 'all') {
-				props.consumeNb(1);
-			}
-		}, 500);
+onMounted(() => {
+	if (window.pywebview) {
+		generator('all', true);
+	} else {
+		window.addEventListener('pywebviewready', () => generator('all', true));
 	}
+});
 
-	function copy(field) {
-		const text = formData.value[field];
-		copyToClipboard(text);
-	}
+function generator(type, isInit = false) {
+	if (props.checkNbBalance(isInit)) return;
+	props.setFormLoading(true);
 
-	function resetForm() {
-		formData.value = {
-			licensePlate: '',
-			vin: '',
-			engineNo: '',
-			address: '',
+	try {
+		const api = window.pywebview?.api;
+		if (!api) return;
+
+		const actions = {
+			licensePlate: () => api.randomLicensePlate().then(v => formData.value.licensePlate = v),
+			vin: () => api.randomVIN().then(v => formData.value.vin = v),
+			engineNo: () => api.randomEngineNo().then(v => formData.value.engineNo = v),
+			address: () => api.randomAddress().then(v => formData.value.address = v),
+			all: () => Object.keys(vehicleInfoFields).forEach(generator)
 		};
+
+		if (actions[type]) actions[type]();
+	} catch (error) {
+		console.error('generator', error);
 	}
+
+	setTimeout(() => {
+		props.setFormLoading(false);
+		if (!isInit && type === 'all') props.consumeNb(1);
+	}, 500);
+}
+
+function copy(field) {
+	copyToClipboard(formData.value[field])
+		.then(() => message.success('复制成功'))
+		.catch(() => message.error('复制失败'));
+}
+
+function resetForm() {
+	formData.value = { licensePlate: '', vin: '', engineNo: '', address: '' };
+}
 </script>
 
-<style lang="css" scoped>
-	.card-header {
-		font-weight: bold;
-	}
-
-	:deep(label) {
-		font-weight: 500;
-	}
-
-	.el-button {
-		transition: all 0.5s ease;
-	}
+<style scoped>
+.generator-container {
+	display: flex;
+	flex-direction: column;
+}
 </style>
