@@ -6,7 +6,7 @@ import logging
 
 # 导入自定义模块
 from src.utils.logger import setup_logging, log_startup_info
-from src.utils.api import Api, load_window_config
+from src.utils.api import Api, get_config
 from src.utils.cache_manager import clear_webview_cache
 
 # 配置选项
@@ -46,61 +46,66 @@ else:
 
 def main():
     logging.info("程序开始执行 => main")
-    
+
     # 启动时清除缓存（如果配置启用）
     if CONFIG['clear_cache_on_startup']:
         logging.info("启动时清除缓存...")
         clear_webview_cache()
-    
+
     # 实例化Api类
     api = Api()
     logging.info("程序开始执行 => api")
-    
+
     # 系统分辨率
     screens = webview.screens
-    screens = screens[0]
-    width = screens.width
-    logging.info("程序开始执行 => width")
-    
-    # 窗口大小
-    initWidth = 1200
-    initHeight = 660
-    logging.info("程序开始执行 => initHeight")
-    
+    screen = screens[0]
+    screen_width = screen.width
+    screen_height = screen.height
+    logging.info(f"屏幕分辨率: {screen_width}x{screen_height}")
+
+    # 读取保存的窗口大小，默认 900x500
+    init_width = get_config('windowWidth', 900)
+    init_height = get_config('windowHeight', 500)
+    logging.info(f"窗口大小: {init_width}x{init_height}")
+
+    # 计算居中位置
+    center_x = (screen_width - init_width) // 2
+    center_y = (screen_height - init_height) // 2
+    logging.info(f"窗口位置: ({center_x}, {center_y})")
+
     # 设置MIME类型
     mimetypes.add_type('application/javascript', '.js')
     logging.info("程序开始执行 => mimetypes")
 
-    # 读取窗口配置
-    window_config = load_window_config()
-    always_on_top = window_config.get('alwaysOnTop', False)
+    # 读取置顶配置
+    always_on_top = get_config('alwaysOnTop', False)
     logging.info(f"窗口置顶状态: {always_on_top}")
 
-    # 创建窗口
-    window = webview.create_window(title='BlingBling', url='http://localhost:8098', width=initWidth, height=initHeight, js_api=api, resizable=True, on_top=always_on_top, text_select=False, confirm_close=False, frameless=True, easy_drag=False)
-    #window = webview.create_window(title='BlingBling', url='http://inkwell.top/gen_ui', width=initWidth, height=initHeight, js_api=api, resizable=True, on_top=always_on_top, text_select=False, confirm_close=False, frameless=True, easy_drag=False)
-    #window = webview.create_window(
-    #    'BlingBling',
-    #    'assets/ui/index.html',
-    #    width=initWidth,
-    #    height=initHeight,
-    #    js_api=api,
-    #    resizable=True,
-    #    on_top=always_on_top,
-    #    text_select=False,
-    #    confirm_close=False,
-    #    frameless=True,
-    #    easy_drag=False
-    #)
+    # 创建窗口（居中显示）
+    window = webview.create_window(
+        title='不娇虑',
+        url='http://localhost:8098',
+        width=init_width,
+        height=init_height,
+        x=center_x,
+        y=center_y,
+        js_api=api,
+        resizable=True,
+        on_top=always_on_top,
+        text_select=False,
+        confirm_close=False,
+        frameless=True,
+        easy_drag=False
+    )
     logging.info("程序开始执行 => window")
-    
+
     api.set_window(window)
     logging.info("程序开始执行 => api.set_window(window)")
-    
+
     # 启动webview
     webview.start(
-        localization=chinese, 
-        http_server=True, 
+        localization=chinese,
+        http_server=True,
         private_mode=False,
         gui=None,
         debug=False

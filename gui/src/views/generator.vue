@@ -13,7 +13,7 @@
 		<div class="app-header">
 			<div class="header-left">
 				<img src="@/assets/icons/jiaoayi.ico" @click.stop="windowConfig.winSetUp = true" style="width: 20px; height: 20px; -webkit-user-drag: none; cursor: pointer" />
-				<span class="app-title">测试数据生成器</span>
+				<span class="app-title">不娇虑</span>
 			</div>
 			<div class="header-right">
 				<!-- 余额进度条 -->
@@ -232,8 +232,8 @@ const alwaysOnTop = ref(false);
 const windowConfig = ref({
 	winSetUp: false,
 	restoreWindow: false,
-	screenWidth: (localStorage.getItem('screenWidth') || 900) * 1,
-	screenHeight: (localStorage.getItem('screenHeight') || 500) * 1,
+	screenWidth: 900,
+	screenHeight: 500,
 	maxScreenWidth: window.screen.width * window.devicePixelRatio || 1920,
 	maxscreenHeight: window.screen.height * window.devicePixelRatio || 1080,
 	exitTipText: '暂别勿思念，转瞬与亲见',
@@ -371,6 +371,11 @@ onMounted(async () => {
 		await waitForPywebview();
 		const topState = await window.pywebview.api.getAlwaysOnTop();
 		alwaysOnTop.value = topState;
+
+		// 从后端读取保存的窗口大小
+		const winSize = await window.pywebview.api.getWindowSize();
+		windowConfig.value.screenWidth = winSize.width;
+		windowConfig.value.screenHeight = winSize.height;
 	} catch (error) {
 		console.warn('pywebview not ready, skipping window controls init');
 	}
@@ -560,12 +565,20 @@ function resizeApp(resizeType) {
 	}
 }
 
-function saveWinSizeItem() {
+async function saveWinSizeItem() {
 	try {
 		localStorage.setItem('screenWidth', windowConfig.value.screenWidth);
 		localStorage.setItem('screenHeight', windowConfig.value.screenHeight);
+
+		// 同步保存到后端配置
+		if (window.pywebview && window.pywebview.api) {
+			await window.pywebview.api.saveWindowSize(
+				windowConfig.value.screenWidth,
+				windowConfig.value.screenHeight
+			);
+		}
 	} catch (error) {
-		console.error('saveWinSizeItem');
+		console.error('saveWinSizeItem', error);
 	}
 }
 </script>
