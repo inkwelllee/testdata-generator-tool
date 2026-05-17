@@ -189,23 +189,39 @@ pytest tests/test_generators.py -v
 
 ### 打包命令
 
+#### 虚拟环境打包（推荐）
+如果使用虚拟环境开发，需要确保在虚拟环境中执行打包命令：
+
+```bash
+# Windows (venv)
+venv\Scripts\activate
+pip install pyinstaller
+pyinstaller -i assets/ico.ico --name 不娇虑 --windowed --clean --noconfirm --onefile --add-data "assets;assets" main.py
+
+# Mac/Linux (venv)
+source venv/bin/activate
+pip install pyinstaller
+pyinstaller -i assets/ico.icns --name 不娇虑 --windowed --clean --noconfirm --onefile --add-data ./assets:./assets main.py
+```
+
 #### Windows 打包
 ```bash
-pyinstaller -i assets/ico.ico --name 测试数据生成器 --windowed --clean --noconfirm --onefile --add-data "assets;assets" main.py
+pyinstaller -i assets/ico.ico --name 不娇虑 --windowed --clean --noconfirm --onefile --add-data "assets;assets" main.py
 ```
 
 #### Mac 打包
 ```bash
-pyinstaller -i assets/ico.icns --name 测试数据生成器 --windowed --clean --noconfirm --onefile --add-data ./assets:./assets main.py
+pyinstaller -i assets/ico.icns --name 不娇虑 --windowed --clean --noconfirm --onefile --add-data ./assets:./assets main.py
 ```
 
 #### Linux 打包
 ```bash
-pyinstaller --name 测试数据生成器 --windowed --clean --noconfirm --onefile --add-data "./assets:./assets" main.py
+pyinstaller --name 不娇虑 --windowed --clean --noconfirm --onefile --add-data "./assets:./assets" main.py
 ```
 
 ### 打包说明
 - 打包前确保已运行 `npm run build` 构建前端
+- 虚拟环境打包可确保依赖完整，避免缺少模块
 - 打包后的程序包含完整的前端界面和后端逻辑
 - 程序会自动在用户目录创建日志文件（可配置）
 - 支持自动缓存管理和清理功能

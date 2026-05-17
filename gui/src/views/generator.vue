@@ -112,8 +112,7 @@
 		<SettingsDrawer
 			v-model:visible="windowConfig.winSetUp"
 			:config="windowConfig"
-			:resizeApp="resizeApp"
-			:saveWinSizeItem="saveWinSizeItem"
+			:resetToDefault="resetToDefault"
 			:changeDirectory="changeDirectory"
 			:changePath="changePath"
 			:checkPath="checkPath"
@@ -332,7 +331,15 @@ function handleResize(event) {
 function stopResize() {
 	if (resizeState.value.isResizing) {
 		resizeState.value.isResizing = false;
-		saveWinSizeItem();
+		// 保存用户拖动后的窗口大小到后端
+		try {
+			window.pywebview.api.saveWindowState(
+				windowConfig.value.screenWidth,
+				windowConfig.value.screenHeight
+			);
+		} catch (error) {
+			console.error('saveWindowState', error);
+		}
 	}
 	document.removeEventListener('mousemove', handleResize);
 	document.removeEventListener('mouseup', stopResize);
@@ -381,8 +388,7 @@ onMounted(async () => {
 	}
 
 	setTimeout(() => {
-		resizeApp();
-		saveWinSizeItem();
+		// 不再调用 resizeApp()，后端已设置正确的窗口大小
 		changeDirectory(windowConfig.value.directoryType, true);
 	}, 100);
 
@@ -550,35 +556,23 @@ function restoreApp() {
 	}
 }
 
-function resizeApp(resizeType) {
+function resizeApp() {
 	try {
-		if ('resize' == resizeType) {
-			windowConfig.value.screenWidth = 900;
-			windowConfig.value.screenHeight = 500;
-			saveWinSizeItem();
-			window.pywebview.api.resizeApp(900, 500);
-		} else {
-			window.pywebview.api.resizeApp(windowConfig.value.screenWidth, windowConfig.value.screenHeight);
-		}
+		window.pywebview.api.resizeApp(windowConfig.value.screenWidth, windowConfig.value.screenHeight);
 	} catch (error) {
 		console.error('resizeApp');
 	}
 }
 
-async function saveWinSizeItem() {
+function resetToDefault() {
 	try {
-		localStorage.setItem('screenWidth', windowConfig.value.screenWidth);
-		localStorage.setItem('screenHeight', windowConfig.value.screenHeight);
-
-		// 同步保存到后端配置
-		if (window.pywebview && window.pywebview.api) {
-			await window.pywebview.api.saveWindowSize(
-				windowConfig.value.screenWidth,
-				windowConfig.value.screenHeight
-			);
-		}
+		window.pywebview.api.resetToDefaultSize().then(defaultSize => {
+			windowConfig.value.screenWidth = defaultSize.width;
+			windowConfig.value.screenHeight = defaultSize.height;
+			window.pywebview.api.resizeApp(defaultSize.width, defaultSize.height);
+		});
 	} catch (error) {
-		console.error('saveWinSizeItem', error);
+		console.error('resetToDefault', error);
 	}
 }
 </script>

@@ -1,5 +1,5 @@
 <template>
-	<div class="verification-container" :class="{ 'is-dark': isDark }">
+	<div class="verification-container" :class="{ 'is-dark': isDark, 'success-fade': isSuccess }">
 		<div class="verification-card">
 			<h2 class="verification-title">请输入密码</h2>
 
@@ -91,6 +91,7 @@ const errorMessage = ref('');
 const isLocked = ref(false);
 const lockRemainingSeconds = ref(0);
 const failedAttempts = ref(0);
+const isSuccess = ref(false);
 
 // 设置输入框引用
 function setInputRef(el, index) {
@@ -246,7 +247,10 @@ async function submitVerification() {
 
 		if (result.success) {
 			message.success('验证成功', { duration: 1500 });
-			router.push('/');
+			isSuccess.value = true;
+			setTimeout(() => {
+				router.push('/');
+			}, 400);
 		} else {
 			errorMessage.value = result.message;
 			clearCode();
@@ -281,6 +285,12 @@ onMounted(async () => {
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.success-fade {
+	opacity: 0;
+	transform: scale(0.95);
 }
 
 .verification-card {
@@ -355,5 +365,6 @@ onMounted(async () => {
 .submit-btn {
 	margin-top: 24px;
 	min-width: 120px;
+	margin-right: 16px;
 }
 </style>

@@ -391,16 +391,39 @@ class Api:
         return config.get('alwaysOnTop', False)
 
     def getWindowSize(self) -> Dict:
-        """获取保存的窗口大小"""
+        """获取当前窗口大小（用于前端边缘缩放计算）"""
+        custom_width = get_config('customWindowWidth')
+        custom_height = get_config('customWindowHeight')
+        if custom_width and custom_height:
+            return {'width': custom_width, 'height': custom_height}
         return {
-            'width': get_config('windowWidth', 900),
-            'height': get_config('windowHeight', 500)
+            'width': get_config('defaultWindowWidth', 900),
+            'height': get_config('defaultWindowHeight', 500)
         }
 
-    def saveWindowSize(self, width: int, height: int) -> None:
-        """保存窗口大小"""
-        set_config('windowWidth', width)
-        set_config('windowHeight', height)
+    def saveWindowState(self, width: int, height: int) -> None:
+        """保存用户拖动后的窗口大小（仅在与默认不同时保存为自定义）"""
+        default_width = get_config('defaultWindowWidth', 900)
+        default_height = get_config('defaultWindowHeight', 500)
+        if width != default_width or height != default_height:
+            set_config('customWindowWidth', width)
+            set_config('customWindowHeight', height)
+            logging.info(f"保存自定义窗口大小: {width}x{height}")
+        else:
+            set_config('customWindowWidth', None)
+            set_config('customWindowHeight', None)
+            logging.info("窗口大小与默认相同，清除自定义")
+
+    def resetToDefaultSize(self) -> Dict:
+        """还原为默认窗口大小，清除自定义大小和位置"""
+        default_width = get_config('defaultWindowWidth', 900)
+        default_height = get_config('defaultWindowHeight', 500)
+        set_config('customWindowWidth', None)
+        set_config('customWindowHeight', None)
+        set_config('windowX', None)
+        set_config('windowY', None)
+        logging.info(f"还原默认窗口大小: {default_width}x{default_height}")
+        return {'width': default_width, 'height': default_height}
 
     def test(self) -> None:
         """测试方法"""

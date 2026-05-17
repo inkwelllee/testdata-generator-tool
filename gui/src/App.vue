@@ -32,8 +32,8 @@
 	const isDark = useDark();
 	const router = useRouter();
 
-	// 等待 pywebview 就绪
-	function waitForPywebview(timeout = 5000) {
+	// 等待 pywebview 就绪（增加超时时间）
+	function waitForPywebview(timeout = 30000) {
 		return new Promise((resolve, reject) => {
 			if (window.pywebview && window.pywebview.api) {
 				resolve();
@@ -49,7 +49,7 @@
 					clearInterval(checkInterval);
 					reject(new Error('pywebview timeout'));
 				}
-			}, 50);
+			}, 100);
 		});
 	}
 
@@ -64,7 +64,9 @@
 				router.replace('/verify');
 			}
 		} catch (error) {
-			console.warn('pywebview not ready, skipping verification check');
+			console.error('pywebview not ready:', error);
+			// 超时后仍跳转到验证页面，确保安全
+			router.replace('/verify');
 		}
 	}
 

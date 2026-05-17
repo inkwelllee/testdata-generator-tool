@@ -3,31 +3,7 @@
 		<n-drawer-content title="设置" closable>
 			<div class="settings-section">
 				<n-text depth="3" style="font-weight: 500; margin-bottom: 8px; display: block">窗口设置</n-text>
-				<n-button size="small" @click="resizeApp('resize')">还原默认大小</n-button>
-			</div>
-
-			<div class="settings-section">
-				<n-text depth="3" style="font-weight: 500; margin-bottom: 8px; display: block">窗口宽度</n-text>
-				<n-slider
-					v-model:value="config.screenWidth"
-					@update:value="resizeApp"
-					@change="saveWinSizeItem"
-					:min="900"
-					:max="config.maxScreenWidth"
-					:step="1"
-				/>
-			</div>
-
-			<div class="settings-section">
-				<n-text depth="3" style="font-weight: 500; margin-bottom: 8px; display: block">窗口高度</n-text>
-				<n-slider
-					v-model:value="config.screenHeight"
-					@update:value="resizeApp"
-					@change="saveWinSizeItem"
-					:min="500"
-					:max="config.maxscreenHeight"
-					:step="1"
-				/>
+				<n-button size="small" @click="resetToDefault">还原默认大小</n-button>
 			</div>
 
 			<div class="settings-section">
@@ -60,7 +36,7 @@
 
 			<template #footer>
 				<n-text depth="3" style="cursor: pointer; user-select: none" @click="handleVersionClick">
-					版本：0.6.4.28
+					版本：0.6.5.11
 				</n-text>
 			</template>
 		</n-drawer-content>
@@ -77,8 +53,7 @@ const message = useMessage();
 const props = defineProps({
 	visible: Boolean,
 	config: Object,
-	resizeApp: Function,
-	saveWinSizeItem: Function,
+	resetToDefault: Function,
 	changeDirectory: Function,
 	changePath: Function,
 	checkPath: Function,

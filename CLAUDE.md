@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code (claude.ai/code) when working in this repository.
 
 ## Development Commands
 
@@ -32,12 +32,21 @@ npm run build:copy          # build and copy to assets/ui/
 - `utils/api.py`: `Api` class exposes all public methods to frontend via pywebview's JS bridge (`pywebview.api.methodName()`)
 
 ### Frontend (gui/)
-Vue 3 + Vite + Element Plus. Components in `components/`, pages in `views/`.
+Vue 3 + Vite + Naive UI. Components in `components/`, pages in `views/`.
 
 ### Key Integration
-- `main.py` creates a pywebview window pointing to Vite dev server (`localhost:8098`) in dev or built files in production
+- `main.py` creates a pywebview window loading `assets/ui/index.html`
 - Frontend calls backend through pywebview's JS bridge, not HTTP
 - `Api` class is the bridge - all public methods are callable from frontend
+- Frontend waits for `window.pywebview.api` to be ready before making calls (see `App.vue`)
+
+## Password Verification
+
+The app has a password verification system:
+- Default password: `inkwell` (set on first run)
+- Password hash stored in `%APPDATA%/pywebview/app_config.json`
+- Failed attempts lock the app temporarily (5+ failures = escalating lockout)
+- Frontend checks verification status on mount via `getVerificationStatus()`
 
 ## Configuration
 
@@ -46,7 +55,7 @@ Application behavior controlled by `CONFIG` dict in `main.py`:
 - `use_pywebview_directory`: Use `%APPDATA%/pywebview/` for logs
 - `clear_cache_on_startup`: Clear WebView cache on start
 
-Window settings (always-on-top) persisted in `%APPDATA%/pywebview/window_config.json`.
+Window settings (always-on-top, window size) persisted in `%APPDATA%/pywebview/app_config.json`.
 
 ## Packaging
 
